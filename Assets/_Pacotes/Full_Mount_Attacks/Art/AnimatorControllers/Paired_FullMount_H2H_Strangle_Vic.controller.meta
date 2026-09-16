@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4f937b6d30cffcc4abd243b481bface2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_H2H_Strangle_Vic.controller
+  uploadId: 518191

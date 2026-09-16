@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1b644d2bb8df6ff42997a272389f6b72
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 384042
+  packageName: Spear Combat Animation V2
+  packageVersion: 1.0
+  assetPath: Assets/SpearCombatAnimationV2/Controller/RM/A_SpearCombatAnimationV2_Dodge_Bw_RM.controller
+  uploadId: 927340

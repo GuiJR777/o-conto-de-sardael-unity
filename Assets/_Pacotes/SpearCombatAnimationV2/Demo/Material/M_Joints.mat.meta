@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4ae3896eab66ba04e9dfbe4e48031771
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 384042
+  packageName: Spear Combat Animation V2
+  packageVersion: 1.0
+  assetPath: Assets/SpearCombatAnimationV2/Demo/Material/M_Joints.mat
+  uploadId: 927340

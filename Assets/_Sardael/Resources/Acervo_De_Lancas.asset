@@ -1,0 +1,259 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1bce6ea9310b3f48872625fe2f491e7, type: 3}
+  m_Name: Acervo_De_Lancas
+  m_EditorClassIdentifier: Assembly-CSharp::Sardael.AcervoDeLancas
+  comprimentoAlvo: 2.2427
+  fracaoDeAgarre: 0.431
+  posicaoNaMao: {x: 9.28287, y: 7.41498, z: -11.86496}
+  rotacaoNaMao: {x: 344.698, y: 78.331, z: 290.765}
+  lancas:
+  - nome: A01
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 2918a82f91716e34e823917b5298bf7c, type: 3}
+    retrato: {fileID: 2800000, guid: 28f85d311d671174080d18235c0d1187, type: 3}
+    alturaCrua: 2.0470412
+  - nome: A02
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: e03d35ca28e48cb468901e5110b32325, type: 3}
+    retrato: {fileID: 2800000, guid: 906b380ed07f91a418a24ddb08b0b4ea, type: 3}
+    alturaCrua: 2.0576468
+  - nome: A03
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 6876eaa9ccc749b45822c2d4e65f1182, type: 3}
+    retrato: {fileID: 2800000, guid: dabce14ff64e1a54ebd2e698a1b4b697, type: 3}
+    alturaCrua: 2.0555396
+  - nome: A04
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 8f6464beb5303bf4b9057dbf19e8b047, type: 3}
+    retrato: {fileID: 2800000, guid: 288950cd7e8991347b834cd1c27f763d, type: 3}
+    alturaCrua: 2.053855
+  - nome: A05
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 9a02ca76fc98fc84eb8dceac0f842161, type: 3}
+    retrato: {fileID: 2800000, guid: 7d6a61334abaf594b9a91d103485f8cc, type: 3}
+    alturaCrua: 2.0455363
+  - nome: A06
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: afbcfa4d5a2abb947804dcd5ca9603b3, type: 3}
+    retrato: {fileID: 2800000, guid: 5f85f0c9b06ff57409d52aa83697d0a9, type: 3}
+    alturaCrua: 2.0376878
+  - nome: A07
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: f9bee43d1d7c9d44f9e74c9661d8ff9b, type: 3}
+    retrato: {fileID: 2800000, guid: d784c1aaf9fb7aa4bb83dec88d31b44e, type: 3}
+    alturaCrua: 2.062484
+  - nome: A08
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 633bfcbc87c90664eb0a986c18765294, type: 3}
+    retrato: {fileID: 2800000, guid: 775017a7ec4ac76479ca7f09ad570cb1, type: 3}
+    alturaCrua: 2.0379806
+  - nome: A09
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 47e99ab77b559114696f628f4ac69532, type: 3}
+    retrato: {fileID: 2800000, guid: e52507cc7ea02bf49b99d73e43440e97, type: 3}
+    alturaCrua: 2.0513587
+  - nome: A10
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: ce97346b0a22de24bbae57dff7091ef4, type: 3}
+    retrato: {fileID: 2800000, guid: c2608dcae43d4c44ca2c5c3c7b650a9e, type: 3}
+    alturaCrua: 2.005095
+  - nome: A11
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 16c0e36c90dab2f469c33c0cffc0052f, type: 3}
+    retrato: {fileID: 2800000, guid: 163ab5d7bd7bd4d47959e2b7a91365cc, type: 3}
+    alturaCrua: 2.0035126
+  - nome: A12
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 17c4c14d00a8fae4f9e422f9b30dc952, type: 3}
+    retrato: {fileID: 2800000, guid: e0bfcbf229391ac458a9d32a0a5cb837, type: 3}
+    alturaCrua: 2.053129
+  - nome: A13
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: dfd9f87480b42ec42bf5cc245d9c452b, type: 3}
+    retrato: {fileID: 2800000, guid: a95146b155f2fef4d92993920065d2e2, type: 3}
+    alturaCrua: 2.0493422
+  - nome: A14
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: adf6a7f511879114fbefdf5bb8a27fcb, type: 3}
+    retrato: {fileID: 2800000, guid: 0d94fa2baa3d5364f82b1c99e2ce0718, type: 3}
+    alturaCrua: 2.0838828
+  - nome: A15
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 171c7538d77fe6b43bf27f929220f9a7, type: 3}
+    retrato: {fileID: 2800000, guid: 5ffc842de83a502418183c4fc4b2b446, type: 3}
+    alturaCrua: 2.084999
+  - nome: A16
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: d21e3476415170c4194f23f00d887e2c, type: 3}
+    retrato: {fileID: 2800000, guid: dd066a21d00c70646a181717335887d8, type: 3}
+    alturaCrua: 2.0676177
+  - nome: A17
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 8ddf9b6cef45f0c41b750a3202bb85aa, type: 3}
+    retrato: {fileID: 2800000, guid: 998eb245cbb864245bddcbb3e19d5e4e, type: 3}
+    alturaCrua: 2.0175526
+  - nome: A18
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: f953a61025eccb74bb2d426a807dabf3, type: 3}
+    retrato: {fileID: 2800000, guid: 12eac1c0bc607064791ccc20b573d675, type: 3}
+    alturaCrua: 2.0624173
+  - nome: A19
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 5172ce9469b3ae345b542541fa3a1dab, type: 3}
+    retrato: {fileID: 2800000, guid: 6a1646187bd491d47b80af9425b0df48, type: 3}
+    alturaCrua: 2.058234
+  - nome: A20
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 9b13711d9413bc94c9ea357a18fb34ca, type: 3}
+    retrato: {fileID: 2800000, guid: d150f50b7e7869f4aa1588320c7c64ea, type: 3}
+    alturaCrua: 2.0832117
+  - nome: A21
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 3938f1d440ae8394799b2e68294091c6, type: 3}
+    retrato: {fileID: 2800000, guid: 28201274e3bc1bd45b2d26ff5c72a0b3, type: 3}
+    alturaCrua: 2.0716002
+  - nome: A22
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: d9ba5540571c0c647a0082b25effaf26, type: 3}
+    retrato: {fileID: 2800000, guid: ce3470dc75e248f43b5617e88bb0a253, type: 3}
+    alturaCrua: 2.072692
+  - nome: A23
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: 740992925d69b5e4fb4c4c2629ec5f3a, type: 3}
+    retrato: {fileID: 2800000, guid: ec09cbcc974b704418d12ac4783f9036, type: 3}
+    alturaCrua: 2.0833986
+  - nome: A24
+    pacote: A
+    modelo: {fileID: 919132149155446097, guid: ecdb2cd9aa2667a41b86a0aade0d30a3, type: 3}
+    retrato: {fileID: 2800000, guid: 4a91dc745463b2342adaf90eefd17e1d, type: 3}
+    alturaCrua: 2.109448
+  - nome: B01
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 3a2eb28e4a7ef3a478d0bb8905a565e9, type: 3}
+    retrato: {fileID: 2800000, guid: dee229d3bd0f9be4cb97381d3ca5a9db, type: 3}
+    alturaCrua: 2.0506814
+  - nome: B02
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 710167af33acbfd4599a15741cfb76b9, type: 3}
+    retrato: {fileID: 2800000, guid: 3393a0b0ebb49b44f8551d451d000fee, type: 3}
+    alturaCrua: 2.0532868
+  - nome: B03
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: f426c76af46cba3469bd7a30210d23fb, type: 3}
+    retrato: {fileID: 2800000, guid: 812d0c7935c3a7e429ccb48580759f73, type: 3}
+    alturaCrua: 2.0451431
+  - nome: B04
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 85011cfd09f8bb641b436ff0b85d7efa, type: 3}
+    retrato: {fileID: 2800000, guid: b89697ed07148864ea112dab0e28a69c, type: 3}
+    alturaCrua: 2.0404284
+  - nome: B05
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 92a76ee37b9ee4b469fd96a79d0c8a12, type: 3}
+    retrato: {fileID: 2800000, guid: b6434982230ec4d4eab6190faa38da99, type: 3}
+    alturaCrua: 2.0455763
+  - nome: B06
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 52e6f77504cd03b4b8192dac72a82816, type: 3}
+    retrato: {fileID: 2800000, guid: 5d33a4da64f9665429adc62369786406, type: 3}
+    alturaCrua: 2.0426183
+  - nome: B07
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: caca15f101c789142bb69a0f626be575, type: 3}
+    retrato: {fileID: 2800000, guid: f873927fee2084846995cec12af70730, type: 3}
+    alturaCrua: 2.0506973
+  - nome: B08
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: ecc42aae75b2b4446b7817b5e2eeb264, type: 3}
+    retrato: {fileID: 2800000, guid: b41429283c169de4db9fd7f046ae1d4a, type: 3}
+    alturaCrua: 2.0174966
+  - nome: B09
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: ddd9bd2e9e2aa0f4e9ee771a79c1c89f, type: 3}
+    retrato: {fileID: 2800000, guid: 408b1054efafe25429f6b0843db277cf, type: 3}
+    alturaCrua: 2.0234094
+  - nome: B10
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 32541ae1b2e164b4899974eeb2073728, type: 3}
+    retrato: {fileID: 2800000, guid: f12e7465f4a73594d8f1f1851d17b164, type: 3}
+    alturaCrua: 2.004794
+  - nome: B11
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 4c037fa4a03c67b41bc1b2bc15919252, type: 3}
+    retrato: {fileID: 2800000, guid: e7841db31626f994aa97875e4aa0ef52, type: 3}
+    alturaCrua: 2.0121002
+  - nome: B12
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: e70765396bc4c1b4981278fa84803ff1, type: 3}
+    retrato: {fileID: 2800000, guid: 48fb525c43afeeb4bad276e3a79538e1, type: 3}
+    alturaCrua: 2.0211442
+  - nome: B13
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 1624a9529fcc705478d7475a08b1ead4, type: 3}
+    retrato: {fileID: 2800000, guid: 40ef623f047785845b08045873a667de, type: 3}
+    alturaCrua: 2.0419257
+  - nome: B14
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 6aec339e75709b4468f10afdcf8372b1, type: 3}
+    retrato: {fileID: 2800000, guid: c3934d0e4dc05bf4c8a31b8b59496d63, type: 3}
+    alturaCrua: 2.0837123
+  - nome: B15
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: a04088c59a7d6734b909aad65a3f707d, type: 3}
+    retrato: {fileID: 2800000, guid: fc01364d81c70cc46be5a8824b05f0ac, type: 3}
+    alturaCrua: 2.057407
+  - nome: B16
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 8ecaa9e992599324c9f8807c16c34e94, type: 3}
+    retrato: {fileID: 2800000, guid: 5970ad9b2a946374b8c67d8c7c1425d3, type: 3}
+    alturaCrua: 2.0676003
+  - nome: B17
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 8b88f1ae604f023439d4177af0f2cd0e, type: 3}
+    retrato: {fileID: 2800000, guid: 77db81c2056109f43aad10c088ff6a8a, type: 3}
+    alturaCrua: 2.0733402
+  - nome: B18
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 89242aeb66b7a584fb8bcdee3861df39, type: 3}
+    retrato: {fileID: 2800000, guid: 0c512947d5013e14bbc7480005ea27c6, type: 3}
+    alturaCrua: 2.0536625
+  - nome: B19
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 3e718c4a7115dfe41994f6b3a85dde4b, type: 3}
+    retrato: {fileID: 2800000, guid: 1e1aa55c07b5174408ce38cd0d789478, type: 3}
+    alturaCrua: 2.063895
+  - nome: B20
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: b7b11c17cabbd5c48b6eeb507848732d, type: 3}
+    retrato: {fileID: 2800000, guid: e5b5acdef6978fd4c9b688dbd20f845d, type: 3}
+    alturaCrua: 2.0805435
+  - nome: B21
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 3f2aff2d9074c244289b735e9bb0a06c, type: 3}
+    retrato: {fileID: 2800000, guid: 58ef67bd3b2f4a04eab3e7754105c0b4, type: 3}
+    alturaCrua: 2.0857456
+  - nome: B22
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 6d8489c96b8532642b21248bb7102f91, type: 3}
+    retrato: {fileID: 2800000, guid: b2e303fa11989394e843f12b32bc379d, type: 3}
+    alturaCrua: 2.0908136
+  - nome: B23
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 989adc6feea3ff349956a5c02b8ec3f0, type: 3}
+    retrato: {fileID: 2800000, guid: 4e282cd526f57d440a5b75ce6dcbf93e, type: 3}
+    alturaCrua: 2.087787
+  - nome: B24
+    pacote: B
+    modelo: {fileID: 919132149155446097, guid: 214fb52b4e6b9034db851fa8e0036ce7, type: 3}
+    retrato: {fileID: 2800000, guid: 6bfc93910e3fa224dbeb9a3533c3ec88, type: 3}
+    alturaCrua: 2.1066499

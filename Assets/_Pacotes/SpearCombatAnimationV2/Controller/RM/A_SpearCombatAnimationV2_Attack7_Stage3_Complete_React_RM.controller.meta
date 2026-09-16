@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c9dd6ca57f30c8c4db9065b2d7f7f9e6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 384042
+  packageName: Spear Combat Animation V2
+  packageVersion: 1.0
+  assetPath: Assets/SpearCombatAnimationV2/Controller/RM/A_SpearCombatAnimationV2_Attack7_Stage3_Complete_React_RM.controller
+  uploadId: 927340

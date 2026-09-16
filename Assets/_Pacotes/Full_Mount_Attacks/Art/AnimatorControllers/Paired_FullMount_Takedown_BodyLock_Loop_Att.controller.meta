@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ffb092f4b19b86344b8ee95fdc6cef10
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_Takedown_BodyLock_Loop_Att.controller
+  uploadId: 518191

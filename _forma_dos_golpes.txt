@@ -1,0 +1,64 @@
+===== A FORMA DOS 35 GOLPES =====
+Unity 6000.5.9f1   15/09/2026 11:51:14
+
+A PONTA e' um ponto fixo do modelo (topo da malha no +Y local), amostrado em 90 passos
+por clipe no referencial do Sardael. O veredito e' contra a capsula MEDIDA do orc:
+1,699 m de altura, 0,191 m de raio.
+
+A GUARDA (quadro zero) tem o peito a -50 graus da linha. Leia a coluna giro contra ESSE
+numero, nao contra zero: postura de haste e' naturalmente de lado.
+
+  clipe                      dur    alcance   pe     pe.alt  altura  desvio  teto   curso   giro@imp  giro@fim  balanco  veredito
+  -------------------------  -----  -------  ------  ------  ------  ------  -----  ------  --------  --------  -------  ---------------------
+  Attack4_Stage1_Complete    1,70s   2,15m  1,97m  0,09m  0,27m  1,37m  2,49m  17,29m       -1g      -49g      50g  passa ao lado
+  Attack8_Stage3_Complete    1,40s   2,54m  1,51m  0,09m  0,67m  0,03m  2,47m  17,13m       -2g      -50g      58g  acerta embaixo
+  Attack9                    1,83s   2,33m  1,56m  0,10m  1,27m  0,59m  2,36m  16,44m       +4g      -49g      59g  passa ao lado
+  Attack6_Stage1_Complete    2,17s   3,20m  2,14m  0,09m  1,57m  0,78m  2,34m  33,11m       -4g      -49g     177g  passa ao lado
+  Attack3_Stage2_Complete    1,17s   1,83m  0,43m  0,09m  1,28m  0,05m  2,37m  18,05m       +9g      -49g      57g  acerta em cima
+  Attack3_Stage1_Complete    1,13s   0,55m  1,22m  0,09m  0,17m  1,59m  0,27m   4,47m       -9g      -49g      50g  passa ao lado
+  Attack4                    3,77s   4,64m  3,49m  0,08m  0,66m  0,05m  2,70m  56,93m      -12g      -50g     175g  acerta embaixo
+  Attack6                    4,27s   4,34m  3,45m  0,06m  1,46m  0,14m  2,20m  55,79m      +18g      -51g     173g  acerta em cima
+  Attack6_Stage2_Complete    1,67s   1,98m  0,56m  0,20m  1,46m  0,20m  2,36m  26,01m      +19g      -50g     177g  acerta em cima
+  Attack6_Stage3_Complete    1,67s   0,65m  0,50m  0,07m  0,28m  1,47m  0,90m   5,57m      -21g      -51g      62g  passa ao lado
+  Attack8_Stage4_Complete    2,17s   3,16m  1,67m  0,09m  0,70m  0,09m  2,59m  33,49m      +22g      -49g     176g  acerta embaixo
+  Attack13                   1,50s   2,34m  0,77m  0,10m  1,34m  0,28m  2,00m  10,25m      +27g      -51g      66g  acerta em cima
+  Attack3                    3,27s   2,42m  0,99m  0,92m  1,39m  0,12m  2,58m  36,71m      -27g      -51g     138g  acerta em cima
+  Attack3_Stage3_Complete    2,03s   1,90m  0,64m  0,06m  1,38m  0,11m  2,74m  23,97m      -27g      -51g     138g  acerta em cima
+  Attack10                   3,57s   4,06m  2,41m  0,20m  0,89m  0,38m  2,79m  51,91m      +30g      -50g     178g  acerta no tronco
+  Attack8_Stage1_Complete    1,33s   3,06m  1,58m  0,09m  1,35m  0,15m  2,11m  11,45m      +31g      -50g      50g  acerta em cima
+  Attack10_Stage2_Complete   2,70s   4,06m  2,42m  0,21m  0,83m  0,56m  2,78m  33,19m      +33g      -50g     174g  acerta no tronco
+  Attack7_Stage1_Complete    1,50s   2,86m  2,01m  0,09m  1,23m  0,08m  2,53m  22,29m      +34g      -50g      71g  acerta em cima
+  Attack8                    4,30s   4,13m  2,71m  0,09m  0,71m  0,61m  2,55m  64,72m      +35g      -49g     179g  passa ao lado
+  Attack7                    3,80s   3,68m  2,24m  0,09m  1,10m  0,22m  2,72m  55,71m      +36g      -50g     180g  acerta no tronco
+  Attack7_Stage2_Complete    1,43s   2,00m  1,54m  0,09m  1,41m  0,30m  2,50m  16,36m      -37g      -50g      78g  acerta em cima
+  Attack2_Stage1_Complete    1,67s   2,58m  0,95m  0,09m  1,38m  0,16m  2,65m  24,27m      +38g      -51g     113g  acerta em cima
+  Attack11                   2,50s   3,03m  2,43m  0,19m  0,93m  0,57m  2,09m  18,27m      -42g      -50g      85g  acerta no tronco
+  Attack4_Stage3_Complete    1,90s   1,51m  0,50m  0,10m  1,44m  0,54m  2,73m  22,43m      -47g      -50g      57g  acerta em cima
+  Attack7_Stage3_Complete    2,37s   3,20m  1,72m  0,15m  0,64m  0,87m  2,75m  33,01m      +49g      -50g     177g  passa ao lado
+  Attack4_Stage2_Complete    1,67s   1,48m  0,32m  0,09m  1,29m  0,17m  2,60m  21,36m      -51g      -50g      57g  acerta em cima
+  Attack12                   3,67s   2,71m  1,55m  0,09m  1,18m  0,10m  2,47m  48,53m      +56g      -50g     107g  acerta no tronco
+  Attack10_Stage1_Complete   2,33s   3,22m  2,31m  0,09m  1,25m  0,48m  2,80m  34,62m      +58g      -52g     180g  acerta em cima
+  Attack5                    3,30s   4,29m  2,36m  0,09m  1,09m  0,51m  2,69m  49,17m      +59g      -50g     174g  acerta no tronco
+  Attack8_Stage2_Complete    1,33s   2,57m  1,68m  0,10m  0,87m  0,30m  2,56m  20,31m      +60g      -48g      89g  acerta no tronco
+  Attack2_Stage2_Complete    3,37s   2,86m  1,88m  0,05m  0,52m  0,06m  2,23m  32,44m      -60g      -50g     178g  acerta embaixo
+  Attack2                    4,57s   3,56m  2,54m  0,04m  0,85m  0,11m  2,65m  49,86m      -62g      -50g     179g  acerta no tronco
+  Attack1_Stage2_Complete    2,47s   3,18m  2,47m  0,10m  1,36m  0,09m  2,92m  41,68m      +64g      -49g     177g  acerta em cima
+  Attack1                    2,93s   3,28m  2,59m  0,10m  1,18m  0,48m  2,95m  43,70m      +68g      -49g     177g  acerta no tronco
+  Attack1_Stage1_Complete    1,50s   1,20m  0,83m  1,16m  2,71m  0,45m  2,80m  13,29m      +75g      -51g     180g  CHUTE (lanca por cima)
+
+COMO LER
+  alcance   o quanto a PONTA avanca, no referencial do Sardael.
+  pe        o quanto o PE avanca, e pe.alt a altura dele nesse instante.
+            Pe adiantado E no ar = chute; adiantado e no chao = so' um passo.
+  altura    a altura da ponta no instante do alcance maximo: onde o golpe chega.
+  desvio    o quanto ela sai do plano nesse instante. O orc tem 0,19 m de raio.
+  teto      altura maxima em todo o clipe: o tamanho da armada, que e' o telegrafo.
+  curso     o caminho percorrido pela ponta.
+  giro@imp  para onde o PEITO aponta NO IMPACTO, em graus da linha, COM SINAL.
+            Zero = de frente para o orc. Perto de 90 = de lado para a tela.
+            Acima de 90 = de costas para o orc.
+  giro@fim  onde o peito esta' no ultimo quadro: se o golpe devolve a guarda.
+  balanco   o pico da torcao no clipe. NAO reprova nada — todo golpe de haste
+            torce o tronco. Fica so' para mostrar o tamanho do gesto.
+
+  27 acertam o corpo do orc.  1 sao chute.  7 passam por fora.

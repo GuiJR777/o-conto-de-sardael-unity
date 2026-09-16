@@ -1,0 +1,34 @@
+===== CADEIA NOVA =====
+Unity 6000.5.9f1   14/09/2026 22:43:58
+
+Clipes escolhidos pelo dono, olhando as animacoes rodando.
+A ponta da lanca amostrada em 90 passos por clipe, no referencial do Sardael.
+
+  estado   avanca  gira   duracao   alcance   lado     curso    impacto   avanco   clipe
+  -------  ------  -----  --------  --------  -------  -------  --------  -------  -----
+  Golpe1   sim     nao     1,500 s   1,303 m  0,081 m  1,251 m   52,2%  0,270 m  Attack1_Stage1_Complete
+  Golpe2   sim     nao     1,167 s   1,850 m  0,072 m  2,062 m   44,4%  0,376 m  Attack3_Stage2_Complete
+  Golpe3   sim     nao     1,667 s   2,019 m  0,255 m  2,223 m   52,2%  1,192 m  Attack6_Stage2_Complete
+  Golpe4   sim     nao     2,033 s   1,941 m  0,029 m  2,405 m   32,2%  0,401 m  Attack3_Stage3_Complete
+  Aparo    nao     nao     1,700 s   2,716 m  0,193 m  2,769 m   76,7%  0,000 m  Attack4_Stage1_Complete
+
+COMO LER
+  alcance  o quanto a ponta da lanca AVANCA, no referencial do Sardael. E' este
+           numero que decide se o golpe encosta no orc, que esta' na linha.
+  lado     o quanto ela esta' fora do plano NESSE MESMO instante. Pequeno = o
+           golpe termina na linha. Grande = ele termina pra dentro da tela, e
+           de perfil isso le' como golpe que passou ao lado do inimigo.
+  impacto  a fracao do clipe em que isso acontece. Vai pro aviso do Animator.
+
+  curso perto de zero = a lanca nao acompanhou a pose; a linha nao vale.
+
+  'gira' TEM que sair 'nao' nos cinco. Rotacao vinda do clipe faz o Sardael
+  virar pra fora da linha no meio do combo — quem manda na direcao e' o codigo.
+
+O QUE EU FACO COM ELES DEPOIS
+  - ALCANCE do Duelo sai da coluna 'alcance' (hoje 1,756 m, do par do Attack4).
+  - o aviso de impacto de cada elo sai da coluna 'impacto'.
+  - tranco do orc por elo: avanco grande pede LevarForte (Hit_Fw_RM); avanco
+    curto pede Levar (Hit_Bw_RM).
+
+O estado Aparo foi repontado pro clipe da lanca.

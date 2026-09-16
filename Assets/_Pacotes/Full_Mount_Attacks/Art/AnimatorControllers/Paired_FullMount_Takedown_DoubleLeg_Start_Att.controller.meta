@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b9e7e3d1fe8409a4f89e7f95442386a4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_Takedown_DoubleLeg_Start_Att.controller
+  uploadId: 518191

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fc7385cdd46d44e42be7efdc465faafb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_1HM_BluntSmack_Att.controller
+  uploadId: 518191

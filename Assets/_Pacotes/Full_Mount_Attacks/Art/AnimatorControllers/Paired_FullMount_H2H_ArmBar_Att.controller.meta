@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e2951077b67653f419e2eabc9eb7cfed
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_H2H_ArmBar_Att.controller
+  uploadId: 518191

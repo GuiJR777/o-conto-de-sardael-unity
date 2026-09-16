@@ -1,0 +1,23 @@
+===== CORPO DO ORC =====
+Unity 6000.5.9f1   14/09/2026 23:49:26
+
+MEDIDO nos ossos do humanoide, numa instancia solta que foi destruida depois.
+
+  raio da capsula       0,191 m   (metade da distancia entre os ombros)
+  altura da capsula     1,699 m   (osso da cabeca 1,569 + calota 0,13)
+  quadril               0,000 m
+
+  envergadura (bracos)  1,599 m   <- NAO usada, e por que:
+     a malha do prefab esta' na pose de bind, de bracos abertos. Usar a caixa
+     dos renderers daria a capsula a largura dos bracos, e o orc empurraria o
+     heroi de longe demais pra qualquer golpe encostar.
+
+  CapsuleCollider CRIADO no Orc.prefab.
+  Rigidbody cinematico garantido (colisor que se move por codigo).
+
+O QUE ISSO MUDA NO COMBATE, E PRECISA SER MEDIDO DE NOVO
+  A capsula do Sardael tem raio 0,32 m. Com 0,191 m no orc, os dois centros nao
+  conseguem ficar a menos de 0,51 m um do outro.
+  A cadeia chegava a 0,58 m no terceiro elo. Se esse piso for maior que isso,
+  as distancias do teste MUDAM — e o teste de combate tem que rodar de novo
+  antes de qualquer conclusao sobre alcance continuar valendo.

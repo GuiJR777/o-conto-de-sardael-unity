@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1183369271afbed4ebc3f7db6bc5e2c5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Scripts/SimpleCameraController.cs
+  uploadId: 518191

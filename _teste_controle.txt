@@ -1,0 +1,176 @@
+t	roteiro	estado	velocidade	x	noChao
+0,00	parado	Locomocao	0,00	4,00	False
+0,35	parado	Locomocao	0,00	4,00	True
+0,68	parado	Locomocao	0,00	4,00	True
+0,92	parado	Locomocao	0,00	4,00	True
+1,20	parado	Locomocao	0,00	4,00	True
+1,40	parado	Locomocao	0,00	4,00	True
+1,60	andando	Locomocao	1,65	4,09	True
+1,81	andando	Locomocao	2,40	4,56	True
+2,01	andando	Locomocao	2,40	5,05	True
+2,21	andando	Locomocao	2,40	5,53	True
+2,42	andando	Locomocao	2,40	6,03	True
+2,62	andando	Locomocao	2,40	6,52	True
+2,82	andando	Locomocao	2,40	7,00	True
+3,07	andando	Locomocao	2,40	7,44	True
+3,28	andando	Locomocao	2,40	8,10	True
+3,49	andando	Locomocao	2,40	8,58	True
+3,69	andando	Locomocao	2,40	9,08	True
+3,90	andando	Locomocao	2,40	9,58	True
+4,10	andando	Locomocao	2,40	10,07	True
+4,30	andando	Locomocao	2,40	10,55	True
+4,50	correndo	Locomocao	2,40	11,03	True
+4,71	correndo	Locomocao	4,50	11,82	True
+4,91	correndo	Locomocao	4,50	12,73	True
+5,11	correndo	Locomocao	4,50	13,65	True
+5,32	correndo	Locomocao	4,50	14,57	True
+5,52	correndo	Locomocao	4,50	15,48	True
+5,73	correndo	Locomocao	4,50	16,40	True
+5,93	correndo	Locomocao	4,50	17,33	True
+6,13	correndo	Locomocao	4,50	18,22	True
+6,34	correndo	Locomocao	4,50	19,15	True
+6,54	correndo	Locomocao	4,50	20,07	True
+6,74	correndo	Locomocao	4,50	20,98	True
+6,95	correndo	Locomocao	4,50	21,90	True
+7,15	correndo	Locomocao	4,50	22,83	True
+7,36	correndo	Locomocao	4,50	23,75	True
+7,56	correndo	Locomocao	4,50	24,68	True
+7,77	correndo	Locomocao	4,50	25,59	True
+7,97	correndo	Locomocao	4,50	26,50	True
+8,17	no ar / caindo	PuloSaida	4,50	27,41	False
+8,38	no ar / caindo	PuloSaida	4,50	28,33	False
+8,58	no ar / caindo	PuloNoAr	4,50	29,26	False
+8,79	no ar / caindo	PuloQueda	4,50	30,18	True
+8,99	no ar / caindo	PuloQueda	4,50	31,07	True
+9,19	no ar / caindo	Locomocao	4,50	32,00	True
+9,40	no ar / caindo	Locomocao	4,50	32,92	True
+9,60	no ar / caindo	Locomocao	4,50	33,84	True
+9,81	no ar / caindo	Locomocao	4,50	34,76	True
+10,01	no ar / caindo	Locomocao	4,50	35,67	True
+10,21	no ar / caindo	Locomocao	4,50	36,57	True
+10,41	no ar / caindo	Locomocao	4,50	37,48	True
+10,61	no ar / caindo	Locomocao	4,50	38,38	True
+10,81	no ar / caindo	Locomocao	4,50	39,29	True
+11,08	voltando a andar	Locomocao	4,39	40,17	True
+11,28	voltando a andar	Locomocao	0,04	40,70	True
+11,48	voltando a andar	Locomocao	3,18	40,38	True
+11,68	voltando a andar	Locomocao	4,50	39,52	True
+11,89	voltando a andar	Locomocao	4,50	38,59	True
+12,09	voltando a andar	Locomocao	4,50	37,68	True
+12,29	voltando a andar	Locomocao	4,50	36,77	True
+12,49	voltando a andar	Locomocao	4,50	35,87	True
+12,69	voltando a andar	Locomocao	4,50	34,96	True
+12,90	voltando a andar	Locomocao	4,50	34,04	True
+13,10	parado de novo	Locomocao	2,90	33,22	True
+13,31	parado de novo	Locomocao	0,00	32,97	True
+13,58	parado de novo	Locomocao	0,00	32,97	True
+13,78	parado de novo	Locomocao	0,00	32,97	True
+13,98	parado de novo	Locomocao	0,00	32,97	True
+14,18	parado de novo	Locomocao	0,00	32,97	True
+14,39	parado de novo	Locomocao	0,00	32,97	True
+14,59	parado de novo	Locomocao	0,00	32,97	True
+14,80	parado de novo	Locomocao	0,00	32,97	True
+15,00	parado de novo	Locomocao	0,00	32,97	True
+15,20	parado de novo	Locomocao	0,00	32,97	True
+15,40	parado de novo	Locomocao	0,00	32,97	True
+15,61	parado de novo	Locomocao	0,00	32,97	True
+15,81	parado de novo	Locomocao	0,00	32,97	True
+16,01	parado de novo	Locomocao	0,00	32,97	True
+16,21	parado de novo	Locomocao	0,00	32,97	True
+16,41	parado de novo	Locomocao	0,00	32,97	True
+16,61	parado de novo	Locomocao	0,00	32,97	True
+16,82	parado de novo	Locomocao	0,00	32,97	True
+17,02	parado de novo	Locomocao	0,00	32,97	True
+17,22	parado de novo	Locomocao	0,00	32,97	True
+17,42	parado de novo	Locomocao	0,00	32,97	True
+17,62	parado de novo	Locomocao	0,00	32,97	True
+17,82	parado de novo	Locomocao	0,00	32,97	True
+18,03	parado de novo	Locomocao	0,00	32,97	True
+18,23	parado de novo	Locomocao	0,00	32,97	True
+18,43	parado de novo	Locomocao	0,00	32,97	True
+18,63	parado de novo	Locomocao	0,00	32,97	True
+18,84	parado de novo	Locomocao	0,00	32,97	True
+19,04	parado de novo	Locomocao	0,00	32,97	True
+19,24	parado de novo	Locomocao	0,00	32,97	True
+19,45	parado de novo	Locomocao	0,00	32,97	True
+19,65	parado de novo	Locomocao	0,00	32,97	True
+19,85	parado de novo	Locomocao	0,00	32,97	True
+20,05	parado de novo	Locomocao	0,00	32,97	True
+20,26	parado de novo	Locomocao	0,00	32,97	True
+20,46	parado de novo	Locomocao	0,00	32,97	True
+20,66	parado de novo	Locomocao	0,00	32,97	True
+20,86	parado de novo	Locomocao	0,00	32,97	True
+21,06	parado de novo	Locomocao	0,00	32,97	True
+21,27	parado de novo	Locomocao	0,00	32,97	True
+21,47	parado de novo	Locomocao	0,00	32,97	True
+21,67	parado de novo	Locomocao	0,00	32,97	True
+21,87	parado de novo	Locomocao	0,45	32,96	True
+22,08	parado de novo	Locomocao	2,40	32,55	True
+22,28	parado de novo	Locomocao	2,40	32,06	True
+22,49	parado de novo	Locomocao	2,40	31,56	True
+22,70	parado de novo	Locomocao	2,40	31,07	True
+22,90	parado de novo	Locomocao	2,40	30,59	True
+23,10	parado de novo	Locomocao	2,40	30,10	True
+23,30	parado de novo	Locomocao	2,40	29,61	True
+23,51	parado de novo	Locomocao	2,40	29,12	True
+23,71	parado de novo	Locomocao	3,87	28,56	True
+23,91	parado de novo	Locomocao	4,50	27,66	True
+24,12	parado de novo	Locomocao	4,50	26,75	True
+24,32	parado de novo	Locomocao	4,50	25,84	True
+24,52	parado de novo	Locomocao	4,50	24,92	True
+24,73	parado de novo	Locomocao	4,50	24,00	True
+24,93	parado de novo	Locomocao	4,50	23,09	True
+25,13	parado de novo	Locomocao	4,50	22,18	True
+25,33	parado de novo	Locomocao	4,50	21,27	True
+25,54	parado de novo	Locomocao	4,50	20,35	True
+25,74	parado de novo	Locomocao	4,50	19,44	True
+25,94	parado de novo	Locomocao	4,50	18,53	True
+26,15	parado de novo	Locomocao	4,50	17,61	True
+26,35	parado de novo	Locomocao	4,50	16,70	True
+26,55	parado de novo	Locomocao	4,50	15,78	True
+26,76	parado de novo	Locomocao	4,50	14,87	True
+26,96	parado de novo	Locomocao	4,50	13,96	True
+27,16	parado de novo	Locomocao	4,50	13,05	True
+27,37	parado de novo	Locomocao	4,50	12,12	True
+27,58	parado de novo	Locomocao	4,50	11,25	True
+27,78	parado de novo	Locomocao	4,50	10,26	True
+27,98	parado de novo	Locomocao	4,50	9,35	True
+28,19	parado de novo	Locomocao	3,58	8,46	True
+28,39	parado de novo	Locomocao	0,31	8,07	True
+28,59	parado de novo	Locomocao	0,78	8,05	True
+28,79	parado de novo	Locomocao	4,01	7,56	True
+29,00	parado de novo	Locomocao	4,50	6,65	True
+29,20	parado de novo	Locomocao	4,50	5,73	True
+29,42	parado de novo	Locomocao	4,50	4,83	True
+29,62	parado de novo	Locomocao	4,50	3,84	True
+30,04	parado de novo	Locomocao	3,36	3,25	True
+30,24	parado de novo	Locomocao	4,34	4,15	True
+30,45	parado de novo	Locomocao	3,09	4,99	True
+30,65	parado de novo	Locomocao	1,36	5,44	True
+30,85	parado de novo	Locomocao	3,07	5,78	True
+31,05	parado de novo	Locomocao	4,50	6,64	True
+31,26	parado de novo	Locomocao	4,50	7,57	True
+31,47	parado de novo	Locomocao	4,50	8,49	True
+31,67	parado de novo	Locomocao	4,50	9,41	True
+31,87	parado de novo	Locomocao	4,50	10,32	True
+32,08	parado de novo	Locomocao	4,50	11,23	True
+32,28	parado de novo	Locomocao	4,50	12,17	True
+32,48	parado de novo	Locomocao	4,50	13,07	True
+32,69	parado de novo	Locomocao	4,50	13,99	True
+32,89	parado de novo	Locomocao	4,50	14,92	True
+33,09	parado de novo	Locomocao	4,50	15,82	True
+33,30	parado de novo	Locomocao	4,50	16,73	True
+33,50	parado de novo	Locomocao	4,50	17,65	True
+33,71	parado de novo	Locomocao	4,50	18,58	True
+33,91	parado de novo	Locomocao	4,50	19,48	True
+34,11	parado de novo	Locomocao	4,50	20,39	True
+34,31	parado de novo	Locomocao	4,50	21,29	True
+34,51	parado de novo	Locomocao	4,50	22,20	True
+34,71	parado de novo	Locomocao	4,50	23,10	True
+34,91	parado de novo	Locomocao	4,50	24,02	True
+35,12	parado de novo	Locomocao	4,50	24,94	True
+35,33	parado de novo	Locomocao	4,50	25,87	True
+35,53	parado de novo	Locomocao	4,50	26,80	True
+35,73	parado de novo	Locomocao	4,50	27,71	True
+35,94	parado de novo	Locomocao	4,50	28,61	True
+36,29	parado de novo	Locomocao	4,50	28,75	True

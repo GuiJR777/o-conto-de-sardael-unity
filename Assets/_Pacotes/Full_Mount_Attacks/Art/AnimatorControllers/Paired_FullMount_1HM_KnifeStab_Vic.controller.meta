@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7dffc3cafce951b4198cb7b6d37cdfd4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227372
+  packageName: Full Mount Attacks
+  packageVersion: 1.0
+  assetPath: Assets/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_1HM_KnifeStab_Vic.controller
+  uploadId: 518191

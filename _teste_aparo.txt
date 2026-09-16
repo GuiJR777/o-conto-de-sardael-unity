@@ -1,0 +1,54 @@
+===== TESTE DO APARO =====
+Unity 6000.5.9f1   14/09/2026 21:07:54
+
+OS NUMEROS
+  telegrafo do orc (golpe comeca -> golpe chega): 0,354 s   MEDIDO
+  janela do aparo: 0,30 s   ESCOLHIDO
+  a janela cobre 85% do telegrafo — sobram 0,054 s em que apertar ainda e' cedo demais
+  reacao humana a estimulo visual fica perto de 0,25 s: compare com o telegrafo
+
+  ok       o controller do heroi tem o estado Aparo
+             sem ele a tecla K nao tem pra onde ir; rode Sardael > Montar Aparo
+  ok       o controller do heroi tem o gatilho "aparar"
+             sem ele o SetTrigger falha calado e o aparo vira invulnerabilidade sem animacao
+  ok       achei o clipe do aparo no controller
+             1 clipes com "Parry"
+  ok       o clipe do aparo nao esta' em loop
+             clipe em loop nunca termina, e a saida do estado depende de terminar
+  ok       1. sem aparo (controle): o heroi apanha
+             apertei=False aparou=False animacaoDeAparo=False apanhou=True
+  ok       1. sem aparo (controle): o aparo NAO conta
+             apertei=False aparou=False animacaoDeAparo=False apanhou=True
+  ok       medi o telegrafo do orc
+             0,354 s entre o golpe comecar e chegar
+  ok       2. aparo no tempo: a tecla foi mesmo apertada
+             sem isto o caso passaria sem encostar no aparo
+  ok       2. aparo no tempo: o heroi NAO apanha
+             apertei=True aparou=True animacaoDeAparo=True apanhou=False
+  ok       2. aparo no tempo: o aparo conta
+             apertei=True aparou=True animacaoDeAparo=True apanhou=False
+  ok       2. aparo no tempo: a animacao de aparo rodou
+             apertei=True aparou=True animacaoDeAparo=True apanhou=False
+  ok       2. aparo no tempo: e o heroi SAI dela sozinho
+             se o clipe estivesse em loop ele ficaria preso na guarda. apertei=True aparou=True animacaoDeAparo=True apanhou=False
+  ok       3. aparo cedo demais: o heroi apanha
+             apertei 0,45 s antes do impacto (janela 0,30 s)  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,45 s antes do impacto, fora da janela de 0,30 s
+  ok       3. aparo cedo demais: o aparo NAO conta
+             apertei 0,45 s antes do impacto (janela 0,30 s)  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,45 s antes do impacto, fora da janela de 0,30 s
+  ok       3. aparo cedo demais: contou como cedo
+             apertei 0,45 s antes do impacto (janela 0,30 s)  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,45 s antes do impacto, fora da janela de 0,30 s
+  ok       4. tamborilar K: o heroi apanha assim mesmo
+             recusados nesta rodada: 11  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,35 s antes do impacto, fora da janela de 0,30 s
+  ok       4. tamborilar K: nao vira invulnerabilidade
+             recusados nesta rodada: 11  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,35 s antes do impacto, fora da janela de 0,30 s
+  ok       4. tamborilar K: a porteira recusou os toques de dentro da acao
+             se nenhum foi recusado, a guarda do Duelo nao esta' funcionando. recusados nesta rodada: 11  |  ORC ACERTOU o heroi (a 1,72 m) — o aparo saiu 0,35 s antes do impacto, fora da janela de 0,30 s
+  ok       5. cancelar o tranco: o heroi apanhou primeiro
+             apanhou=True entrouNoAparo=False recusados nesta rodada: 1
+  ok       5. cancelar o tranco: K NAO tira o heroi do Atingido
+             se entrar no aparo aqui, K virou botao de cancelar o castigo. apanhou=True entrouNoAparo=False recusados nesta rodada: 1
+  ok       5. cancelar o tranco: a porteira recusou o toque
+             apanhou=True entrouNoAparo=False recusados nesta rodada: 1
+
+TUDO PASSOU
+fotos em: C:/Users/Desktop/Desktop/o conto de sardael/o conto de sardael unity/o conto e sardael/Assets/../gravacao_aparo

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c1a97e2dc4a17064bbf38489133d3c02
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 384042
+  packageName: Spear Combat Animation V2
+  packageVersion: 1.0
+  assetPath: Assets/SpearCombatAnimationV2/Controller/RM/A_SpearCombatAnimationV2_Attack4_Stage2_Complete_RM.controller
+  uploadId: 927340

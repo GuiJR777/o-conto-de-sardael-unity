@@ -164,6 +164,7 @@ namespace Sardael
         int olhando = 1;
         float saiuDoChaoEm = -99f;
         Vector3 deslocamentoDaAnimacao;
+        float deslocamentoDeCombateX;
 
         void Awake()
         {
@@ -269,8 +270,10 @@ namespace Sardael
         {
             float passoDaAnimacao = deslocamentoDaAnimacao.x;
             deslocamentoDaAnimacao.x = 0f;
+            float passoDoCombate = deslocamentoDeCombateX;
+            deslocamentoDeCombateX = 0f;
 
-            cc.Move(new Vector3(velX * dt + passoDaAnimacao, velY * dt, 0f));
+            cc.Move(new Vector3(velX * dt + passoDaAnimacao + passoDoCombate, velY * dt, 0f));
 
             // travar na linha: e' isto que faz o jogo ser 2.5D
             var p = transform.position;
@@ -301,6 +304,25 @@ namespace Sardael
         public void InjetarRolar()         { rolarDeFora = true; }
         public void InjetarArranco()       { arrancoDeFora = true; }
 
+        /// <summary>
+        /// Acrescenta a correcao horizontal do combate ao mesmo pipeline do root motion.
+        /// O deslocamento e consumido por <see cref="CharacterController.Move(Vector3)"/>.
+        /// </summary>
+        public bool AdicionarDeslocamentoDeCombate(float deltaX)
+        {
+            if (Travado || !isActiveAndEnabled || Mathf.Approximately(deltaX, 0f)) return false;
+            deslocamentoDeCombateX += deltaX;
+            return true;
+        }
+
+        /// <summary>Permite ao targeting orientar Sardael sem mover ou teleportar o corpo.</summary>
+        public bool DefinirDirecaoDeCombate(int direcao)
+        {
+            if (Travado || direcao == 0) return false;
+            olhando = direcao < 0 ? -1 : 1;
+            return true;
+        }
+
         void LerEntrada(out float eixo, out bool correndo, out bool pulou,
                         out bool esquivou, out bool rolou, out bool arrancou)
         {
@@ -318,6 +340,7 @@ namespace Sardael
                 // empurrando o corpo mesmo com a entrada zerada.
                 velX = 0f;
                 deslocamentoDaAnimacao = Vector3.zero;
+                deslocamentoDeCombateX = 0f;
                 return;
             }
 

@@ -128,7 +128,7 @@ namespace Sardael
             texto.color = corDaLetra;
             texto.alignment = TextAlignmentOptions.Center;
             texto.raycastTarget = false;
-            texto.enableWordWrapping = false;
+            texto.textWrappingMode = TextWrappingModes.NoWrap;
 
             Assentar();
         }

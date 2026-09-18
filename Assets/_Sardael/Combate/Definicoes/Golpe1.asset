@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 750899c0355bf274487b3ae671564a68, type: 3}
+  m_Name: Golpe1
+  m_EditorClassIdentifier: Assembly-CSharp::Sardael.DefinicaoDeAtaque
+  id: golpe_1
+  eloCombo: 1
+  alcance: 1.756
+  alcanceMagnetismo: 4.75
+  distanciaDesejada: 1.45
+  velocidadeAproximacao: 10
+  dano: 20
+  poise: 25
+  padraoDeAlvo: 0
+  deslocamento: 0
+  flowGerado: 10
+  momentoDoImpacto: 0.42

@@ -6,6 +6,51 @@
 
 ---
 
+## STATUS ATUAL — COMBATE FREE FLOW (2026-09-18)
+
+> Este bloco registra o estado executável atual e prevalece sobre recomendações históricas conflitantes nas ondas abaixo. A decisão vigente é combate lateral em uma única linha: movimento físico em X, altura em Y e Z fixo.
+
+Cena de desenvolvimento: `Assets/_Sardael/Cenas/Combate_Sandbox.unity`.
+
+### Concluído
+
+- [x] **Fase A — Inspeção:** scripts legados, Animator Controllers, Input Actions, cenas e baseline de compilação revisados.
+- [x] **Fase B — Sandbox:** cena isolada com Sardael real, câmera lateral, chão, limites e dois inimigos de cada lado.
+- [x] **Fase C — Input:** `EntradaDeCombate` usa as actions existentes `Player/Move` e `Player/Attack` do New Input System.
+- [x] **Fase D — Targets:** `AlvoDeCombate` e `RegistroDeCombate` usam posição física e ordenação por distância em X.
+- [x] **Fase E — Ataques:** quatro assets `DefinicaoDeAtaque`, preservando os alcances medidos dos quatro golpes.
+- [x] **Fase F — Combate do herói:** escolha contextual esquerda/direita, alvo estável durante o golpe, dano e reação básica.
+- [x] **Fase G — Lunge:** aproximação suave pelo `MovimentoDoHeroi` e `CharacterController.Move`, sem teleporte e sem deslocamento em Z.
+- [x] **Fase H — Troca de alvo:** combo ping-pong E3 → E1 → E3 validado em Play Mode. A fila preserva o primeiro comando pendente de cada elo sob spam.
+
+### Validação concluída na sandbox
+
+- [x] Ataque sem inimigos próximos.
+- [x] Um inimigo à direita e um à esquerda, isoladamente.
+- [x] Dois inimigos de cada lado.
+- [x] Inimigo fora do alcance magnético.
+- [x] Troca de lado durante o combo.
+- [x] Alvo morto/inválido antes do impacto.
+- [x] Inimigos muito próximos.
+- [x] Lunge bloqueado por collider.
+- [x] Spam de Attack sem sobrescrever o alvo pendente.
+- [x] Compilação final e Console sem erros ou warnings novos do combate.
+
+### Próximas fases — não iniciadas
+
+- [ ] **Fase I — Multi-target:** implementar e validar `FrontTwo`, `FrontThree`, `BothSides` e `Piercing`.
+- [ ] **Fase J — Displacement:** `Push`, `Pull`, `Launch`, `CrossSide`, `KnockThrough` e `PushPlayer`.
+- [ ] **Fase K — Collision chain:** colisão previsível entre inimigos deslocados.
+- [ ] **Fase L — Combat Director:** tokens de ataque e coordenação de pressão dos inimigos.
+- [ ] **Fase M — Flow:** ganho, perda, decay, multiplicadores e especial escolhido pelo jogador.
+- [ ] **Fase N — Execution:** integrar reserva/alinhamento de alvo e os finishers existentes.
+
+### Próximo gate
+
+Antes da Fase I, jogar e ajustar humanamente o feeling de `alcanceMagnetismo = 4,75 m`, `velocidadeAproximacao = 10 m/s`, distâncias desejadas, tolerância de impacto e momentos normalizados dos quatro golpes. Não integrar em cenas narrativas antes desse aceite.
+
+---
+
 ## ONDA 0 — DECIDIR (meio dia, zero linha de código)
 
 Estas quatro decisões são as que custam caro depois. Nenhuma delas é código; todas são uma página de texto e dois campos no Inspector.

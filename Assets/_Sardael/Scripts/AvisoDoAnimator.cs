@@ -19,6 +19,8 @@ namespace Sardael
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo info, int camada)
         {
+            var combate = animator.GetComponentInParent<CombateDoHeroi>();
+            if (combate != null && combate.AoComecarEstado(aviso)) return;
             if (Duelo.Atual != null) Duelo.Atual.AoComecarEstado(aviso, animator);
         }
     }

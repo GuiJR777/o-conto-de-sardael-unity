@@ -95,7 +95,7 @@ namespace Sardael
             textoDaFala = Texto("fala", fundo.transform, tamanhoDaFala, corDaFala,
                                 new Vector2(0f, 0f), new Vector2(1f, 1f),
                                 new Vector2(28f, 16f), new Vector2(-28f, -50f));
-            textoDaFala.enableWordWrapping = true;
+            textoDaFala.textWrappingMode = TextWrappingModes.Normal;
         }
 
         TextMeshProUGUI Texto(string nome, Transform pai, int tamanho, Color cor,

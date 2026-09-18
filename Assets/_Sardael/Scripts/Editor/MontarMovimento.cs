@@ -305,7 +305,7 @@ namespace Sardael
 
         // ------------------------------------------------------------------ a lanca
 
-        const string LANCA = "Assets/Synty/PolygonGoblinWarCamp/Prefabs/Weapons/SM_Wep_Spear_01.prefab";
+        const string LANCA = "Assets/_Pacotes/Synty/PolygonGoblinWarCamp/Prefabs/Weapons/SM_Wep_Spear_01.prefab";
 
         /// <summary>
         /// Poe a lanca na mao direita do Sardael.

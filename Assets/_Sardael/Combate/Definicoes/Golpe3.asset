@@ -16,11 +16,15 @@ MonoBehaviour:
   eloCombo: 3
   alcance: 1.756
   alcanceMagnetismo: 4.75
+  alcanceMultiAlvo: 4
   distanciaDesejada: 1.45
   velocidadeAproximacao: 10
   dano: 20
   poise: 25
-  padraoDeAlvo: 0
-  deslocamento: 0
+  padraoDeAlvo: 1
+  deslocamento: 1
+  distanciaDeslocamento: 0.35
+  velocidadeDeslocamento: 6
+  alturaLancamento: 1.1
   flowGerado: 10
   momentoDoImpacto: 0.44

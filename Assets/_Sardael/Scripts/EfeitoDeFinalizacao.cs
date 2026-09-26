@@ -59,6 +59,7 @@ namespace Sardael
         public float torque = 7f;
 
         [Header("Teste")]
+        public bool automaticoPorAnimacao = true;
         public bool repetirNoLoop = true;
         [Tooltip("Segundos que a cabeca fica no chao antes do efeito reiniciar.")]
         public float esperaAntesDeRefazer = 4f;
@@ -70,7 +71,11 @@ namespace Sardael
         bool disparado;
         float tempoAnterior, momentoDoCorte;
 
-        void Awake()
+        public bool Disparado => disparado;
+
+        void Awake() => PrepararReferencias();
+
+        void PrepararReferencias()
         {
             anim = GetComponent<Animator>();
             if (anim == null) anim = GetComponentInChildren<Animator>(true);
@@ -89,7 +94,7 @@ namespace Sardael
 
         void Update()
         {
-            if (anim == null) return;
+            if (!automaticoPorAnimacao || anim == null) return;
             float t = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             t = t - Mathf.Floor(t);
 
@@ -101,6 +106,12 @@ namespace Sardael
                 Desfazer();
 
             if (!disparado && t >= instante) Disparar();
+        }
+
+        public void DispararAgora()
+        {
+            if (anim == null) PrepararReferencias();
+            if (!disparado) Disparar();
         }
 
         // depois do Animator escrever as poses, senao o osso volta ao tamanho normal

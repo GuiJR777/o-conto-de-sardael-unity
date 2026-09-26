@@ -156,7 +156,8 @@ namespace Sardael
         static readonly string[] nomesDeEstado = {
             "Locomocao", "PuloSaida", "PuloNoAr", "PuloQueda",
             "Esquiva", "Rolar", "Arranco",
-            "Golpe1", "Golpe2", "Golpe3", "Atingido", "Aparo" };
+            "Golpe1", "Golpe2", "Golpe3", "Golpe4", "Atingido", "Aparo",
+            "Bloqueio", "ContraAtaque", "Morte" };
 
         CharacterController cc;
         Animator anim;
@@ -313,6 +314,13 @@ namespace Sardael
             if (Travado || !isActiveAndEnabled || Mathf.Approximately(deltaX, 0f)) return false;
             deslocamentoDeCombateX += deltaX;
             return true;
+        }
+
+        public void CancelarDeslocamentoDeCombate()
+        {
+            velX = 0f;
+            deslocamentoDaAnimacao = Vector3.zero;
+            deslocamentoDeCombateX = 0f;
         }
 
         /// <summary>Permite ao targeting orientar Sardael sem mover ou teleportar o corpo.</summary>

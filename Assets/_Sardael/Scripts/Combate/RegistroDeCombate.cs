@@ -30,6 +30,13 @@ namespace Sardael
             return consulta.Count == 0 ? null : consulta[0];
         }
 
+        public AlvoDeCombate PrimeiroNoLadoOposto(Vector3 origem, AlvoDeCombate referencia)
+        {
+            if (referencia == null) return null;
+            int lado = referencia.transform.position.x >= origem.x ? -1 : 1;
+            return PrimeiroNoLado(origem, lado);
+        }
+
         public int PreencherLado(Vector3 origem, int lado, List<AlvoDeCombate> resultado)
         {
             resultado.Clear();
@@ -43,6 +50,17 @@ namespace Sardael
                 if (delta * lado > 0.001f) resultado.Add(alvo);
             }
 
+            resultado.Sort((a, b) =>
+                Mathf.Abs(a.transform.position.x - origem.x)
+                    .CompareTo(Mathf.Abs(b.transform.position.x - origem.x)));
+            return resultado.Count;
+        }
+
+        public int PreencherTodos(Vector3 origem, List<AlvoDeCombate> resultado)
+        {
+            resultado.Clear();
+            LimparInvalidos();
+            resultado.AddRange(alvos);
             resultado.Sort((a, b) =>
                 Mathf.Abs(a.transform.position.x - origem.x)
                     .CompareTo(Mathf.Abs(b.transform.position.x - origem.x)));

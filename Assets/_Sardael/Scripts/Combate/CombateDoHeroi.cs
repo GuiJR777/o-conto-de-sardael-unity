@@ -33,6 +33,8 @@ namespace Sardael
         public float DistanciaDoAlvo => alvoAtual == null
             ? -1f
             : Mathf.Abs(alvoAtual.transform.position.x - transform.position.x);
+        public bool EmAtaque => eloAtual > 0 || eloPendente > 0 || EloDoEstadoAtual() > 0;
+        public int CancelamentosDefensivos { get; private set; }
 
         public void Configurar(
             MovimentoDoHeroi novoMovimento,
@@ -135,6 +137,31 @@ namespace Sardael
         {
             if (aviso != "impactoDoHeroi") return false;
             ResolverImpacto();
+            return true;
+        }
+
+        public bool CancelarParaDefesa(int direcao)
+        {
+            if (!EmAtaque || direcao == 0 || movimento == null || direcao == movimento.Olhando)
+                return false;
+
+            eloAtual = 0;
+            eloPendente = 0;
+            ataqueAtual = null;
+            ataquePendente = null;
+            alvoAtual = null;
+            alvoPendente = null;
+            impactoResolvido = true;
+            lungePercorrido = 0f;
+            entrada?.CancelarAtaquesPendentes();
+            movimento.CancelarDeslocamentoDeCombate();
+            movimento.DefinirDirecaoDeCombate(direcao);
+            if (animator != null)
+            {
+                animator.ResetTrigger(P_ATACAR);
+                animator.CrossFade("Bloqueio", 0.03f, 0, 0f);
+            }
+            CancelamentosDefensivos++;
             return true;
         }
 

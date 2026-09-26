@@ -27,6 +27,8 @@ namespace Sardael
             jaAvisou = true;
             var combate = animator.GetComponentInParent<CombateDoHeroi>();
             if (combate != null && combate.AoAvisoDeImpacto(aviso)) return;
+            var inimigo = animator.GetComponentInParent<MotorDeCombateDoInimigo>();
+            if (inimigo != null && inimigo.AoAvisoDeImpacto(aviso)) return;
             if (Duelo.Atual != null) Duelo.Atual.AoComecarEstado(aviso, animator);
         }
     }

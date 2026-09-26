@@ -6,7 +6,7 @@
 
 ---
 
-## STATUS ATUAL — COMBATE FREE FLOW (2026-09-18)
+## STATUS ATUAL — COMBATE FREE FLOW (2026-09-21)
 
 > Este bloco registra o estado executável atual e prevalece sobre recomendações históricas conflitantes nas ondas abaixo. A decisão vigente é combate lateral em uma única linha: movimento físico em X, altura em Y e Z fixo.
 
@@ -15,13 +15,28 @@ Cena de desenvolvimento: `Assets/_Sardael/Cenas/Combate_Sandbox.unity`.
 ### Concluído
 
 - [x] **Fase A — Inspeção:** scripts legados, Animator Controllers, Input Actions, cenas e baseline de compilação revisados.
-- [x] **Fase B — Sandbox:** cena isolada com Sardael real, câmera lateral, chão, limites e dois inimigos de cada lado.
+- [x] **Fase B — Sandbox:** cena isolada com Sardael real, câmera lateral, chão, limites e três inimigos de cada lado.
 - [x] **Fase C — Input:** `EntradaDeCombate` usa as actions existentes `Player/Move` e `Player/Attack` do New Input System.
 - [x] **Fase D — Targets:** `AlvoDeCombate` e `RegistroDeCombate` usam posição física e ordenação por distância em X.
 - [x] **Fase E — Ataques:** quatro assets `DefinicaoDeAtaque`, preservando os alcances medidos dos quatro golpes.
 - [x] **Fase F — Combate do herói:** escolha contextual esquerda/direita, alvo estável durante o golpe, dano e reação básica.
 - [x] **Fase G — Lunge:** aproximação suave pelo `MovimentoDoHeroi` e `CharacterController.Move`, sem teleporte e sem deslocamento em Z.
 - [x] **Fase H — Troca de alvo:** combo ping-pong E3 → E1 → E3 validado em Play Mode. A fila preserva o primeiro comando pendente de cada elo sob spam.
+- [x] **Fase I — Multi-target:** o combo comum usa somente `Single`, `FrontTwo` e `FrontThree` à frente da direção escolhida. `BothSides` e `Piercing` permanecem disponíveis apenas para habilidades futuras.
+- [x] **Fase J — Displacement:** o combo comum aplica somente `Push` leve. `Pull`, `Launch`, `CrossSide`, `KnockThrough` e `PushPlayer` permanecem disponíveis apenas para habilidades futuras.
+- [x] **Fase K — Collision chain:** inimigo lançado contra vizinho encerra o deslocamento, recebe reação forte e aplica stagger previsível no atingido.
+- [x] **Fase L — Combat Director:** um único turno global de ataque; as duas filas mantêm pressão, mas somente um inimigo pode avisar ou golpear por vez.
+- [x] **Fase M — Flow:** ganho confirmado, bônus multi-hit, delay/decay, penalidade de dano, multiplicador de parry e consumo explícito. Flow cheio não dispara nada sozinho.
+- [x] **Fase N — Execution:** `Player/Execution` reserva, alinha e trava o par; reutiliza controladores pareados e `EfeitoDeFinalizacao`, mata o alvo e libera o estado. `Player/FlowSpecial` oferece Crowd Knockdown como escolha alternativa.
+- [x] **Fase O — Fila viva:** todos os inimigos recebem uma posição por lado e se reorganizam quando o herói anda, um inimigo morre ou a ordem física muda.
+- [x] **Fase P — Ataques inimigos:** um único portador de turno global exibe aviso visual antes do golpe e aplica dano no frame de impacto medido da animação.
+- [x] **Fase Q — Defesa e contra-ataque:** `Player/Block` permite bloqueio direcional; o atacante reage imediatamente ao aparo, que abre uma janela curta em que Attack executa contra-ataque de 4 de vida e 100 de poise.
+- [x] **Fase R — Vida, stun e morte:** vida/dano/morte do herói, quebra e recuperação de poise, stun e animação de morte dos inimigos.
+- [x] **Fase S — Execução contextual:** inimigo atordoado dentro do alcance exibe `E`; `Player/Interact` reserva o par e executa a animação de finalização sem consumir Flow.
+- [x] **Fase T — Perda de turno:** o portador do turno atingido interrompe aviso/golpe, perde o token e fica temporariamente inelegível enquanto outro inimigo assume.
+- [x] **Fase U — Cancelamento defensivo:** direção oposta + Block cancela combo, impacto e root motion pendentes, vira o herói e entra imediatamente em `Bloqueio`.
+- [x] **Fase V — Locomoção da fila:** reposicionamento usa `AndarFrente`/`AndarTras`, voltando a `Parado` ao alcançar a posição.
+- [x] **Fase W — Finalizações no chão:** `Takedown_DoubleLeg_Start` derruba o alvo e uma entre quatro finalizações do setor `Chao — FINALIZACOES (Full Mount)` é sorteada sem repetição imediata: KnifeStab, SlashNeck, AxeToFace ou HeadSmash.
 
 ### Validação concluída na sandbox
 
@@ -34,20 +49,36 @@ Cena de desenvolvimento: `Assets/_Sardael/Cenas/Combate_Sandbox.unity`.
 - [x] Inimigos muito próximos.
 - [x] Lunge bloqueado por collider.
 - [x] Spam de Attack sem sobrescrever o alvo pendente.
+- [x] Multi-target 1/2/2/3 e Piercing com três inimigos na frente.
+- [x] Combo frontal D-D-D-D: nenhum inimigo atrás recebeu dano, poise, reação ou deslocamento; os alvos à frente receberam dano, perda de poise, reação e `Push` leve.
+- [x] Os seis tipos de deslocamento, reordenação física da fila e colisão em cadeia.
+- [x] Diretor limitado a 1 turno global; mesmo cercado, nunca há dois avisos ou golpes inimigos simultâneos.
+- [x] Combo completo gerando 50 Flow; penalidade de dano reduzindo 40 → 15.
+- [x] Execution via Input Action: 1 alvo reservado, efeito disparado, registro 6 → 5 e herói liberado.
+- [x] Catálogo de execução contém quatro pares Full Mount sincronizados; o finalizador usado fica exposto no painel e um toque curto em `E` é aceito mesmo durante o fim de uma ação do herói.
+- [x] Crowd Knockdown via Input Action: cinco alvos restantes atingidos e Flow consumido.
+- [x] Herói e todos os inimigos permaneceram em Z = 0 nos testes das fases I–N.
+- [x] Fila dos dois lados convergiu para posições ordenadas e somente um inimigo recebeu o turno global de ataque.
+- [x] Ataque inimigo mostrou telegraph, disparou o estado `Golpe` e retirou 18 de vida no impacto.
+- [x] Bloqueio frontal anulou dano, fez o atacante reagir ao aparo e abriu contra-ataque; o contra retirou somente 4 de vida, zerou poise e disparou `Atordoado`.
+- [x] Mortes do herói e do inimigo entraram no estado `Morte` e interromperam movimento/ataques.
+- [x] Inimigo atordoado exibiu um único indicador `E`; a tecla real iniciou a execução pareada, matou 1 alvo e ocultou o prompt.
+- [x] Portador atingido registrou 1 turno perdido, ficou sem token e o Diretor entregou o único token global a outro inimigo.
+- [x] Durante `Golpe1`, A+F cancelou o ataque, mudou o lado de +1 para -1 e entrou em `Bloqueio` antes do impacto.
+- [x] Cinco inimigos entraram simultaneamente em movimento de fila e os ciclos de caminhada foram confirmados visualmente.
 - [x] Compilação final e Console sem erros ou warnings novos do combate.
 
-### Próximas fases — não iniciadas
+### Próximas integrações — fora da sandbox
 
-- [ ] **Fase I — Multi-target:** implementar e validar `FrontTwo`, `FrontThree`, `BothSides` e `Piercing`.
-- [ ] **Fase J — Displacement:** `Push`, `Pull`, `Launch`, `CrossSide`, `KnockThrough` e `PushPlayer`.
-- [ ] **Fase K — Collision chain:** colisão previsível entre inimigos deslocados.
-- [ ] **Fase L — Combat Director:** tokens de ataque e coordenação de pressão dos inimigos.
-- [ ] **Fase M — Flow:** ganho, perda, decay, multiplicadores e especial escolhido pelo jogador.
-- [ ] **Fase N — Execution:** integrar reserva/alinhamento de alvo e os finishers existentes.
+- [ ] Ligar `RegistrarParry` e `RegistrarDanoRecebido` aos futuros caminhos definitivos de defesa/vida do herói.
+- [ ] Fazer rodada de tuning humano de deslocamentos, cadência do Diretor, decay e custo de Flow.
+- [x] Escolher e montar quatro pares de execução da `Finishers_Sardael`, preservando reação, distância e duração de cada par.
+- [ ] Integrar o sistema em um encontro real somente depois do aceite de feeling na sandbox.
+- [ ] Criar HUD definitivo de vida/Flow e substituir o painel IMGUI de laboratório.
 
 ### Próximo gate
 
-Antes da Fase I, jogar e ajustar humanamente o feeling de `alcanceMagnetismo = 4,75 m`, `velocidadeAproximacao = 10 m/s`, distâncias desejadas, tolerância de impacto e momentos normalizados dos quatro golpes. Não integrar em cenas narrativas antes desse aceite.
+Jogar a sequência completa na sandbox e ajustar humanamente `alcanceMagnetismo = 4,75 m`, `velocidadeAproximacao = 10 m/s`, deslocamentos, distância de pressão, decay e timings da execução. Não integrar em cenas narrativas antes desse aceite.
 
 ---
 

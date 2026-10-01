@@ -65,15 +65,16 @@ A correcao anterior de escala e seguranca de collider sera mantida. O prefab do 
 - Clipe-base repetido em varios estados: mostrar que o override afetara todos os estados que compartilham exatamente a mesma referencia.
 - Clipe incompativel: permitir que o Unity faça sua validacao normal e exibir aviso quando o tipo de rig nao for adequado, quando detectavel.
 
-## Testes e validacao
+## Validacao pos-implementacao
 
-- Teste EditMode confirma que dois clipes distintos com o mesmo nome sao substituidos pelas referencias corretas.
-- Teste EditMode confirma que slots vazios mantem os clipes-base.
-- Teste EditMode confirma sincronizacao de estados e Blend Trees.
-- Teste EditMode confirma que a configuracao cria apenas um `AnimatorOverrideController` e pode reaplicar overrides.
-- Teste EditMode confirma que o prefab de cabeca dos goblins usa `Cabeca_Orc.asset`, nunca `Cabeca_Sardael.asset`.
-- Teste PlayMode/validacao ao vivo confirma que o parry selecionado no Inspector realmente toca.
-- Validacao ao vivo da finalizacao confirma que a cabeca visual e a do goblin e que o protagonista nao sofre deslocamento anormal.
+Nao sera usado TDD para esta alteracao. Depois da implementacao, serao feitos testes basicos de funcionamento:
+
+- recompilar o projeto e confirmar que o Console nao possui novos erros;
+- confirmar que o componente lista estados e clipes de Blend Trees no Inspector;
+- escolher um parry diferente no Inspector e confirmar em Play Mode que ele realmente toca;
+- confirmar que campos vazios continuam usando os clipes originais;
+- executar a finalizacao em um goblin e confirmar visualmente que a cabeca e a do orc;
+- confirmar que o protagonista nao sofre deslocamento vertical ou impulso anormal durante a finalizacao.
 
 ## Fora de escopo
 

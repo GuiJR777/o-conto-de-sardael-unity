@@ -193,7 +193,11 @@ namespace Sardael
             }
 
             cabecaSolta = Instantiate(prefabDaCabeca, ossoCabeca.position, ossoCabeca.rotation);
-            cabecaSolta.transform.localScale = ossoCabeca.lossyScale;
+            // A escala do prefab converte as unidades da malha (a cabeca do Sardael vem em
+            // centimetros). Sobrescreve-la pela escala do osso fazia o collider crescer 100x.
+            // Multiplicar preserva a escala autoral e ainda acompanha esqueletos escalados.
+            cabecaSolta.transform.localScale =
+                Vector3.Scale(prefabDaCabeca.transform.localScale, ossoCabeca.lossyScale);
 
             var rb = cabecaSolta.GetComponent<Rigidbody>();
             if (rb != null)

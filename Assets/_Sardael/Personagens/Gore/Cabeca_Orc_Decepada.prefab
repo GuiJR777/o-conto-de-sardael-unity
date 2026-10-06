@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6088491630490897058}
   - component: {fileID: 7232680239254419787}
   m_Layer: 0
-  m_Name: Cabeca_Decepada
+  m_Name: Cabeca_Orc_Decepada
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -23,13 +23,15 @@ namespace SardaelEditor
         const string DerrubadaEscolhida = "Takedown_DoubleLeg_Start";
         const string FxSangue =
             "Assets/_Pacotes/Synty/PolygonGeneric/Prefabs/FX/FX_Blood_Splatter_01.prefab";
-        const string CabecaDecepada = "Assets/_Sardael/Personagens/Gore/Cabeca_Sardael_Decepada.prefab";
+        const string CabecaDecepada = "Assets/_Sardael/Personagens/Gore/Cabeca_Orc_Decepada.prefab";
         const string ClipBloqueio =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/Polearm/HumanM@ParryPolearm01 - Loop.fbx";
         const string ClipStun =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@Stun01.fbx";
         const string ClipMorte =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath01.fbx";
+        const string ClipAparo =
+            "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/Polearm/HumanM@ParryPolearm01 - Hit.fbx";
         const string ClipAndarFrente =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Movement/Walk/HumanM@Walk01_Forward.fbx";
         const string ClipAndarTras =
@@ -122,6 +124,14 @@ namespace SardaelEditor
             animatorHeroi.runtimeAnimatorController = controllerHeroi;
             animatorHeroi.applyRootMotion = true;
             animatorHeroi.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
+            var trocador = heroi.GetComponent<TrocadorDeAnimacoes>();
+            if (trocador == null) trocador = heroi.AddComponent<TrocadorDeAnimacoes>();
+            trocador.Configurar(animatorHeroi);
+            TrocadorDeAnimacoesEditor.Sincronizar(trocador);
+            var clipeAparo = CarregarClip(ClipAparo);
+            TrocadorDeAnimacoesEditor.DefinirSubstituicao(trocador, "Aparo", clipeAparo);
+            TrocadorDeAnimacoesEditor.DefinirReversao(trocador, "Aparo", true);
 
             var cc = heroi.GetComponent<CharacterController>();
             if (cc == null) cc = heroi.AddComponent<CharacterController>();
@@ -247,6 +257,19 @@ namespace SardaelEditor
                 PastaControllersDeExecucao + nome + papel + ".controller");
         }
 
+        static AnimationClip[] CarregarAnimacoesDeMorte()
+        {
+            // As quatro mortes do pacote, pra demonstrar o sorteio. Da' pra enxugar a lista
+            // no Inspector de cada inimigo.
+            return new[]
+            {
+                CarregarClip("Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath01.fbx"),
+                CarregarClip("Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath02.fbx"),
+                CarregarClip("Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath03.fbx"),
+                CarregarClip("Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath04.fbx")
+            };
+        }
+
         static void CriarLuz()
         {
             var sol = new GameObject("Sol");
@@ -324,6 +347,10 @@ namespace SardaelEditor
             motor.Configurar(reacao);
             var alvo = inimigo.AddComponent<AlvoDeCombate>();
             alvo.Configurar(registro, reacao, motor);
+            alvo.AnimacoesDeMorte = CarregarAnimacoesDeMorte();
+            alvo.SumirAposMorte = true;
+            alvo.SegundosAteSumir = 5f;
+            inimigo.AddComponent<BarraDeVidaDoInimigo>();
             inimigo.AddComponent<IndicadorDeExecucao>().Configurar(alvo, jogador);
             var efeito = inimigo.AddComponent<EfeitoDeFinalizacao>();
             efeito.automaticoPorAnimacao = false;

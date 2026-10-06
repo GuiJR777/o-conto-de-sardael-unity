@@ -1063,7 +1063,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -1104,6 +1104,9 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte: []
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &360017310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1459,6 +1462,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4206472827264791589, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 578765675}
+    - targetCorrespondingSourceObject: {fileID: 4206472827264791589, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 578765682}
   m_SourcePrefab: {fileID: 100100000, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
 --- !u!4 &578765671 stripped
 Transform:
@@ -1498,6 +1504,8 @@ MonoBehaviour:
   flow: {fileID: 73290433}
   diretor: {fileID: 73290432}
   animatorHeroi: {fileID: 578765673}
+  controladorDaDerrubadaDoExecutor: {fileID: 0}
+  controladorDaDerrubadaDaVitima: {fileID: 0}
   variantes:
   - nome: Attack1_Stage2_Complete
     controladorDoExecutor: {fileID: 9100000, guid: 0597c8b3641ff29409c2f89b28ff3c40, type: 2}
@@ -1505,26 +1513,32 @@ MonoBehaviour:
     distanciaDeAlinhamento: 2.361
     instanteDoImpacto: 1.15
     duracaoTotal: 2.42
+    decapitar: 1
   - nome: Attack3_Stage3_Complete
     controladorDoExecutor: {fileID: 9100000, guid: 7a897cb74467cf1479c323d48888ea56, type: 2}
     controladorDaVitima: {fileID: 9100000, guid: 0008ca7fb441a8e4c98c535c04d42f11, type: 2}
     distanciaDeAlinhamento: 1.756
     instanteDoImpacto: 0.92
     duracaoTotal: 1.98
+    decapitar: 1
   - nome: Attack6_Stage3_Complete
     controladorDoExecutor: {fileID: 9100000, guid: a50f8b61758f57048b382b742f9dc5e7, type: 2}
     controladorDaVitima: {fileID: 9100000, guid: 8140fba5abdd9d9428e189ca308cc582, type: 2}
     distanciaDeAlinhamento: 1.756
     instanteDoImpacto: 0.72
     duracaoTotal: 1.62
+    decapitar: 1
   - nome: Attack8_Stage4_Complete
     controladorDoExecutor: {fileID: 9100000, guid: 73cb500ca04dfbe44ae379be19d3f37f, type: 2}
     controladorDaVitima: {fileID: 9100000, guid: 5ec72bf089f20184bbda9c73cf0d33e0, type: 2}
     distanciaDeAlinhamento: 1.756
     instanteDoImpacto: 0.98
     duracaoTotal: 2.12
+    decapitar: 0
   alcanceDeReserva: 4.5
   velocidadeDeAlinhamento: 7
+  duracaoDaDerrubada: 1.62
+  toleranciaDoComandoDeInteracao: 0.75
   raioDoEspecial: 5.5
 --- !u!114 &578765676
 MonoBehaviour:
@@ -1658,6 +1672,157 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &578765682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578765674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caccd0dc30980e840b9f31e1247395fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sardael.TrocadorDeAnimacoes
+  animator: {fileID: 578765673}
+  controladorSincronizado: {fileID: 9100000, guid: 34e29522b789374469cb2c3bd2eadfe1, type: 2}
+  substituicoes:
+  - caminhoDoEstado: Base Layer/Aparo
+    nomeDoEstado: Aparo
+    clipeOriginal: {fileID: 8993902097722301239, guid: 10bbb19361a1582479a1985bb2474ce4, type: 3}
+    clipeSubstituto: {fileID: 3094330708855449807, guid: 52a5b8b939fb17b45ad9bffcbc1e8bf1, type: 3}
+    tocarAoContrario: 1
+    clipeReversoGerado: {fileID: 7400000, guid: 35a4771e16c64d744a3f6a4f530e2770, type: 2}
+    assinaturaDaFonteReversa: 52a5b8b939fb17b45ad9bffcbc1e8bf1:3094330708855449807:3e1675fbac9413bb1589ba3d6cb99c50
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Arranco
+    nomeDoEstado: Arranco
+    clipeOriginal: {fileID: 8993902097722301239, guid: 0c5351b6fb406b94e9399e86d4c2e472, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Atingido
+    nomeDoEstado: Atingido
+    clipeOriginal: {fileID: 8993902097722301239, guid: 2d027d6b8f1e47c41a7ab84673fd33a0, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Bloqueio
+    nomeDoEstado: Bloqueio
+    clipeOriginal: {fileID: 3094330708855449807, guid: 773a7de92646b114891d64e83bb286ed, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Esquiva
+    nomeDoEstado: Esquiva
+    clipeOriginal: {fileID: 8993902097722301239, guid: 47a236f661285e040abb3ed4f9e374cd, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Golpe1 | Base Layer/ContraAtaque
+    nomeDoEstado: Golpe1
+    clipeOriginal: {fileID: 8993902097722301239, guid: 9bab56ff0e6540c438c7d31f19bd3aea, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Golpe2
+    nomeDoEstado: Golpe2
+    clipeOriginal: {fileID: 8993902097722301239, guid: 1d2391b32ad784949a1364d0368a544f, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Golpe3
+    nomeDoEstado: Golpe3
+    clipeOriginal: {fileID: 8993902097722301239, guid: a7b9f40ab4529c343aae52d8256689a5, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Golpe4
+    nomeDoEstado: Golpe4
+    clipeOriginal: {fileID: 8993902097722301239, guid: d76e470b83539b94bb8eb21482741e56, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: 'Base Layer/Locomocao/Locomocao [1]'
+    nomeDoEstado: Locomocao
+    clipeOriginal: {fileID: 8993902097722301239, guid: 19cc24c8863626e43b48f3dfe9bb08dc, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: 'Base Layer/Locomocao/Locomocao [2]'
+    nomeDoEstado: Locomocao
+    clipeOriginal: {fileID: 8993902097722301239, guid: df126620428f63841bab50c1e4f4936c, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: 'Base Layer/Locomocao/Locomocao [3]'
+    nomeDoEstado: Locomocao
+    clipeOriginal: {fileID: 8993902097722301239, guid: eab447d027a16a149964c4d6e479c5da, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Morte
+    nomeDoEstado: Morte
+    clipeOriginal: {fileID: 3094330708855449807, guid: 3efbd3b8cb129e64598937492de2b27d, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/PuloNoAr
+    nomeDoEstado: PuloNoAr
+    clipeOriginal: {fileID: 8993902097722301239, guid: 967bf90c529c046499cbe0952ee84c33, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/PuloQueda
+    nomeDoEstado: PuloQueda
+    clipeOriginal: {fileID: 8993902097722301239, guid: 648d2b0f2ad82d14481ed38b13dc8ea8, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/PuloSaida
+    nomeDoEstado: PuloSaida
+    clipeOriginal: {fileID: 8993902097722301239, guid: 52e768af9dc65084593670332a67e91d, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
+  - caminhoDoEstado: Base Layer/Rolar
+    nomeDoEstado: Rolar
+    clipeOriginal: {fileID: 8993902097722301239, guid: abb36f944f1a799428be8502b3d1418a, type: 3}
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
+    erroDoClipeReverso: 
 --- !u!1001 &638258469
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1802,7 +1967,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -1843,6 +2008,9 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte: []
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &638258476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2254,7 +2422,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -2295,6 +2463,10 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte:
+  - {fileID: 0}
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &716784498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2922,7 +3094,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -2963,6 +3135,9 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte: []
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &918338151
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3450,7 +3625,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -3491,6 +3666,9 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte: []
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &1187618971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4163,6 +4341,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1856591244}
   - component: {fileID: 1856591243}
+  - component: {fileID: 1856591245}
   m_Layer: 0
   m_Name: Sol
   m_TagString: Untagged
@@ -4250,6 +4429,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1856591245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1856591242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1969832570
 GameObject:
   m_ObjectHideFlags: 0
@@ -4648,7 +4856,7 @@ MonoBehaviour:
   jatoTamanho: 1.8
   jatoAlcance: 1.1
   decapitar: 1
-  prefabDaCabeca: {fileID: 6032497344984178897, guid: 64c650859587b3a4b95db4cd161c7df8, type: 3}
+  prefabDaCabeca: {fileID: 8867134536151127964, guid: 1dc0057e78536624d919ef6065275926, type: 3}
   ossoDaCabeca: Head
   impulso: {x: 0, y: 0.6, z: -1}
   forca: 3.4
@@ -4689,6 +4897,9 @@ MonoBehaviour:
   vidaMaxima: 100
   poiseMaximo: 100
   duracaoDoStun: 2.2
+  animacoesDeMorte: []
+  sumirAposMorte: 1
+  segundosAteSumir: 4
 --- !u!114 &2125927917
 MonoBehaviour:
   m_ObjectHideFlags: 0

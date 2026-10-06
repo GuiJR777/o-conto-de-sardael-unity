@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Sardael
@@ -11,20 +13,48 @@ namespace Sardael
         [SerializeField, Min(0f)] float poiseMaximo = 100f;
         [SerializeField, Min(0.1f)] float duracaoDoStun = 2.2f;
 
+        [Header("Morte")]
+        [Tooltip("Animacoes de morte. Com uma so', ela toca sempre; com varias, uma e'\n"
+               + "sorteada a cada morte. Vazio deixa o clipe do estado de morte do controller.")]
+        [SerializeField] AnimationClip[] animacoesDeMorte = new AnimationClip[0];
+        [Tooltip("O corpo some depois de um tempo apos a morte.")]
+        [SerializeField] bool sumirAposMorte = true;
+        [SerializeField, Min(0.5f)] float segundosAteSumir = 4f;
+
         float vidaAtual;
         float poiseAtual;
         bool vivo = true;
         Object reservadoPor;
+        Coroutine sumico;
 
         public bool Valido => isActiveAndEnabled && vivo;
         public bool Vivo => vivo;
         public float VidaAtual => vidaAtual;
+        public float VidaMaxima => vidaMaxima;
         public float PoiseAtual => poiseAtual;
         public int ColisoesRecebidas { get; private set; }
         public int AparosRecebidos { get; private set; }
         public MotorDeCombateDoInimigo Motor => motor;
         public bool Reservado => reservadoPor != null;
         public bool Atordoado => motor != null && motor.Atordoado;
+
+        public AnimationClip[] AnimacoesDeMorte
+        {
+            get => animacoesDeMorte;
+            set => animacoesDeMorte = value;
+        }
+
+        public bool SumirAposMorte
+        {
+            get => sumirAposMorte;
+            set => sumirAposMorte = value;
+        }
+
+        public float SegundosAteSumir
+        {
+            get => segundosAteSumir;
+            set => segundosAteSumir = Mathf.Max(0.5f, value);
+        }
 
         public void Configurar(
             RegistroDeCombate novoRegistro,
@@ -129,9 +159,27 @@ namespace Sardael
             vivo = false;
             reservadoPor = null;
             registro?.Desregistrar(this);
-            reacao?.TocarMorte();
+            reacao?.TocarMorte(SortearAnimacaoDeMorte());
             motor?.Interromper();
             foreach (var colisor in GetComponentsInChildren<Collider>()) colisor.enabled = false;
+            if (sumirAposMorte && sumico == null) sumico = StartCoroutine(SumirDepois());
+        }
+
+        AnimationClip SortearAnimacaoDeMorte()
+        {
+            if (animacoesDeMorte == null || animacoesDeMorte.Length == 0) return null;
+            var validos = new List<AnimationClip>(animacoesDeMorte.Length);
+            for (int i = 0; i < animacoesDeMorte.Length; i++)
+                if (animacoesDeMorte[i] != null) validos.Add(animacoesDeMorte[i]);
+            if (validos.Count == 0) return null;
+            return validos[Random.Range(0, validos.Count)];
+        }
+
+        IEnumerator SumirDepois()
+        {
+            yield return new WaitForSeconds(segundosAteSumir);
+            sumico = null;
+            Destroy(gameObject);
         }
     }
 }

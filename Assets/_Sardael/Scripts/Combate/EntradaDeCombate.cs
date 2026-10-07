@@ -14,6 +14,9 @@ namespace Sardael
         [SerializeField] string acaoExecutar = "Execution";
         [SerializeField] string acaoEspecial = "FlowSpecial";
         [SerializeField] string acaoBloquear = "Block";
+        [SerializeField] string acaoEsquivar = "Dodge";
+        [SerializeField] string acaoPular = "Jump";
+        [SerializeField] string acaoCorrer = "Sprint";
 
         InputAction mover;
         InputAction atacar;
@@ -21,19 +24,29 @@ namespace Sardael
         InputAction executar;
         InputAction especial;
         InputAction bloquear;
+        InputAction esquivar;
+        InputAction pular;
+        InputAction correr;
         int ataquesPendentes;
         int interacoesPendentes;
         int execucoesPendentes;
         int especiaisPendentes;
+        int esquivasPendentes;
+        int pulosPendentes;
         bool habilitouMover;
         bool habilitouAtacar;
         bool habilitouInteragir;
         bool habilitouExecutar;
         bool habilitouEspecial;
         bool habilitouBloquear;
+        bool habilitouEsquivar;
+        bool habilitouPular;
+        bool habilitouCorrer;
 
-        public float MoveX => mover == null ? 0f : mover.ReadValue<Vector2>().x;
+        public Vector2 Movimento => mover == null ? Vector2.zero : mover.ReadValue<Vector2>();
+        public float MoveX => Movimento.x;
         public bool Bloqueando => bloquear != null && bloquear.IsPressed();
+        public bool Correndo => correr != null && correr.IsPressed();
 
         public void Configurar(InputActionAsset asset)
         {
@@ -52,6 +65,9 @@ namespace Sardael
             executar = acoes.FindAction(mapa + "/" + acaoExecutar, false);
             especial = acoes.FindAction(mapa + "/" + acaoEspecial, false);
             bloquear = acoes.FindAction(mapa + "/" + acaoBloquear, false);
+            esquivar = acoes.FindAction(mapa + "/" + acaoEsquivar, false);
+            pular = acoes.FindAction(mapa + "/" + acaoPular, false);
+            correr = acoes.FindAction(mapa + "/" + acaoCorrer, false);
         }
 
         void OnEnable()
@@ -81,6 +97,17 @@ namespace Sardael
                 if (!especial.enabled) { especial.Enable(); habilitouEspecial = true; }
             }
             if (bloquear != null && !bloquear.enabled) { bloquear.Enable(); habilitouBloquear = true; }
+            if (esquivar != null)
+            {
+                esquivar.performed += AoEsquivar;
+                if (!esquivar.enabled) { esquivar.Enable(); habilitouEsquivar = true; }
+            }
+            if (pular != null)
+            {
+                pular.performed += AoPular;
+                if (!pular.enabled) { pular.Enable(); habilitouPular = true; }
+            }
+            if (correr != null && !correr.enabled) { correr.Enable(); habilitouCorrer = true; }
         }
 
         void OnDisable()
@@ -89,15 +116,22 @@ namespace Sardael
             if (interagir != null) interagir.started -= AoInteragir;
             if (executar != null) executar.performed -= AoExecutar;
             if (especial != null) especial.performed -= AoEspecial;
+            if (esquivar != null) esquivar.performed -= AoEsquivar;
+            if (pular != null) pular.performed -= AoPular;
             if (habilitouAtacar && atacar != null) atacar.Disable();
             if (habilitouInteragir && interagir != null) interagir.Disable();
             if (habilitouExecutar && executar != null) executar.Disable();
             if (habilitouEspecial && especial != null) especial.Disable();
             if (habilitouBloquear && bloquear != null) bloquear.Disable();
+            if (habilitouEsquivar && esquivar != null) esquivar.Disable();
+            if (habilitouPular && pular != null) pular.Disable();
+            if (habilitouCorrer && correr != null) correr.Disable();
             if (habilitouMover && mover != null) mover.Disable();
             habilitouMover = habilitouAtacar = habilitouInteragir = habilitouExecutar =
-                habilitouEspecial = habilitouBloquear = false;
-            ataquesPendentes = interacoesPendentes = execucoesPendentes = especiaisPendentes = 0;
+                habilitouEspecial = habilitouBloquear = habilitouEsquivar = habilitouPular =
+                habilitouCorrer = false;
+            ataquesPendentes = interacoesPendentes = execucoesPendentes = especiaisPendentes =
+                esquivasPendentes = pulosPendentes = 0;
         }
 
         void AoAtacar(InputAction.CallbackContext contexto)
@@ -108,6 +142,8 @@ namespace Sardael
         void AoInteragir(InputAction.CallbackContext contexto) => interacoesPendentes = 1;
         void AoExecutar(InputAction.CallbackContext contexto) => execucoesPendentes = 1;
         void AoEspecial(InputAction.CallbackContext contexto) => especiaisPendentes = 1;
+        void AoEsquivar(InputAction.CallbackContext contexto) => esquivasPendentes = 1;
+        void AoPular(InputAction.CallbackContext contexto) => pulosPendentes = 1;
 
         public bool ConsumirAtaque()
         {
@@ -136,6 +172,20 @@ namespace Sardael
         {
             if (especiaisPendentes <= 0) return false;
             especiaisPendentes = 0;
+            return true;
+        }
+
+        public bool ConsumirEsquiva()
+        {
+            if (esquivasPendentes <= 0) return false;
+            esquivasPendentes = 0;
+            return true;
+        }
+
+        public bool ConsumirPulo()
+        {
+            if (pulosPendentes <= 0) return false;
+            pulosPendentes = 0;
             return true;
         }
     }

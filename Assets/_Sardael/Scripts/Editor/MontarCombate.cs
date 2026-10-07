@@ -230,6 +230,8 @@ namespace SardaelEditor
             t = atingido.AddTransition(locomocao);
             t.hasExitTime = true; t.exitTime = 1f; t.duration = 0.12f; t.hasFixedDuration = true;
 
+            MontarEsquivaDirecional.Configurar(ctrl);
+
             EditorUtility.SetDirty(ctrl);
             AssetDatabase.SaveAssets();
             Debug.Log("[Combate] controller do heroi: locomocao + 3 elos + atingido");

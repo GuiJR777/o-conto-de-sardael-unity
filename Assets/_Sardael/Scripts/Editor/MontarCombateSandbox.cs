@@ -20,6 +20,8 @@ namespace SardaelEditor
         const string InputActions = "Assets/Settings/InputSystem_Actions.inputactions";
         const string PastaControllersDeExecucao =
             "Assets/_Pacotes/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_";
+        const string PastaControllersDeExecucaoEmPe =
+            "Assets/_Pacotes/SpearCombatAnimationV2/Controller/RM/A_SpearCombatAnimationV2_";
         const string DerrubadaEscolhida = "Takedown_DoubleLeg_Start";
         const string FxSangue =
             "Assets/_Pacotes/Synty/PolygonGeneric/Prefabs/FX/FX_Blood_Splatter_01.prefab";
@@ -49,19 +51,25 @@ namespace SardaelEditor
             TipoDeDeslocamento.Push
         };
         static readonly float[] DistanciasDeslocamento = { 0.2f, 0.3f, 0.35f, 0.5f };
-        static readonly string[] ExecucoesEscolhidas =
+        static readonly string[] ExecucoesNoChao =
         {
-            "1HM_KnifeStab",
             "1HM_SlashNeck",
-            "1HM_AxeToFace",
             "H2H_HeadSmash"
         };
         // O Double Leg da bancada comeca com 0,991 m entre os pivôs. Os pares de chao
         // partem sobrepostos e recebem o reposicionamento ao fim da derrubada.
-        static readonly float[] DistanciasDasExecucoes = { 0.991f, 0.991f, 0.991f, 0.991f };
-        static readonly float[] ImpactosDasExecucoes = { 1.34f, 0.68f, 1.32f, 0.72f };
-        static readonly float[] DuracoesDasExecucoes = { 2.58f, 1.25f, 2.58f, 1.42f };
-        static readonly bool[] DecapitacoesDasExecucoes = { false, true, false, false };
+        static readonly float[] ImpactosNoChao = { 0.68f, 0.72f };
+        static readonly float[] DuracoesNoChao = { 1.25f, 1.42f };
+        static readonly bool[] DecapitacoesNoChao = { true, false };
+        static readonly string[] ExecucoesEmPe =
+        {
+            "Attack7_Stage3_Complete",
+            "Attack8_Stage4_Complete"
+        };
+        // Os pares RM da lanca foram animados a 1,756 m e 0,041 m de lado, com os dois
+        // personagens na mesma rotacao. A duracao termina pouco antes do loop do controller.
+        static readonly float[] ImpactosEmPe = { 1.30f, 1.18f };
+        static readonly float[] DuracoesEmPe = { 2.25f, 2.05f };
         static readonly PadraoDeAlvo[] Padroes =
         {
             PadraoDeAlvo.Single,
@@ -113,10 +121,12 @@ namespace SardaelEditor
             var resolvedor = sistemas.AddComponent<ResolvedorDeImpacto>();
             resolvedor.Configurar(registro, flow);
             var diretor = sistemas.AddComponent<DiretorDeCombate>();
+            var modo = sistemas.AddComponent<ModoDeCombate>();
 
             var heroi = (GameObject)PrefabUtility.InstantiatePrefab(prefabHeroi);
             heroi.name = "Sardael";
-            heroi.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, 90f, 0f));
+            heroi.transform.SetPositionAndRotation(
+                new Vector3(-9f, 0f, 0f), Quaternion.Euler(0f, 90f, 0f));
             RemoverLegado(heroi);
 
             var animatorHeroi = heroi.GetComponent<Animator>();
@@ -152,29 +162,34 @@ namespace SardaelEditor
             combate.Configurar(movimento, entrada, registro, resolvedor, animatorHeroi, definicoes);
             var defesa = heroi.GetComponent<DefesaDoHeroi>();
             if (defesa == null) defesa = heroi.AddComponent<DefesaDoHeroi>();
-            defesa.Configurar(entrada, combate, movimento, animatorHeroi, flow);
+            defesa.Configurar(entrada, combate, movimento, animatorHeroi, flow, diretor);
             var vida = heroi.GetComponent<VidaDoHeroi>();
             if (vida == null) vida = heroi.AddComponent<VidaDoHeroi>();
             vida.Configurar(movimento, animatorHeroi, flow, diretor, defesa);
             MontarMovimento.EncaixarLanca(heroi);
 
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E3", -4.2f);
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E2", -3.0f);
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E1", -1.8f);
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E4", 1.8f);
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E5", 3.0f);
-            CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E6", 4.2f);
+            var inimigos = new[]
+            {
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E1", new Vector3(-2.8f, 0f, 2.6f)),
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E2", new Vector3(0f, 0f, 4.1f)),
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E3", new Vector3(3.2f, 0f, 2.2f)),
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E4", new Vector3(3.4f, 0f, -2.3f)),
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E5", new Vector3(0f, 0f, -4.0f)),
+                CriarInimigo(prefabOrc, controllerOrc, registro, heroi.transform, fxSangue, cabecaDecepada, "E6", new Vector3(-2.8f, 0f, -2.5f))
+            };
 
-            CriarCamera(heroi.transform);
+            CriarCamera(heroi.transform, registro, combate, out var cameraLateral, out var cameraCombate);
             diretor.Configurar(registro, heroi.transform);
-            diretor.DefinirAtivo(true);
+            diretor.DefinirAtivo(false);
             var execucao = heroi.AddComponent<SistemaDeExecucao>();
             execucao.Configurar(
                 movimento, entrada, registro, flow, diretor, animatorHeroi,
                 controllerDerrubadaHeroi, controllerDerrubadaVitima,
                 variantesDeExecucao);
+            modo.Configurar(movimento, registro, diretor, cameraCombate);
+            CriarEncontro(modo, inimigos);
             sistemas.AddComponent<PainelCombateSandbox>().Configurar(
-                combate, registro, resolvedor, diretor, flow, execucao, vida, defesa);
+                combate, registro, resolvedor, diretor, flow, execucao, vida, defesa, modo, movimento);
 
             EditorSceneManager.MarkSceneDirty(cena);
             EditorSceneManager.SaveScene(cena, Cena);
@@ -188,6 +203,31 @@ namespace SardaelEditor
         {
             if (File.Exists(Cena)) EditorSceneManager.OpenScene(Cena, OpenSceneMode.Single);
             else Executar();
+        }
+
+        [MenuItem("Sardael/Combate/Atualizar quatro finalizacoes na cena aberta")]
+        public static void AtualizarFinalizacoesNaCenaAberta()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogError("[Combate Sandbox] pare o Play Mode antes de atualizar as finalizacoes.");
+                return;
+            }
+
+            var sistema = Object.FindAnyObjectByType<SistemaDeExecucao>(FindObjectsInactive.Include);
+            var novasVariantes = CarregarVariantesDeExecucao();
+            if (sistema == null || novasVariantes == null)
+            {
+                Debug.LogError("[Combate Sandbox] sistema ou pares de finalizacao ausentes na cena aberta.");
+                return;
+            }
+
+            sistema.ConfigurarVariantes(novasVariantes);
+            EditorUtility.SetDirty(sistema);
+            EditorSceneManager.MarkSceneDirty(sistema.gameObject.scene);
+            EditorSceneManager.SaveScene(sistema.gameObject.scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Combate Sandbox] finalizacoes atualizadas: 2 no chao + 2 em pe.");
         }
 
         static DefinicaoDeAtaque[] CriarDefinicoes()
@@ -206,10 +246,10 @@ namespace SardaelEditor
                 definicao.id = "golpe_" + (i + 1);
                 definicao.eloCombo = i + 1;
                 definicao.alcance = Alcances[i];
-                definicao.alcanceMagnetismo = Mathf.Max(Alcances[i] + 1.5f, 4.75f);
+                definicao.alcanceMagnetismo = Mathf.Max(Alcances[i] + 1.5f, 8.5f);
                 definicao.alcanceMultiAlvo = AlcancesMultiAlvo[i];
                 definicao.distanciaDesejada = Distancias[i];
-                definicao.velocidadeAproximacao = 10f;
+                definicao.velocidadeAproximacao = 14f;
                 definicao.dano = 20f;
                 definicao.poise = 25f;
                 definicao.padraoDeAlvo = Padroes[i];
@@ -225,12 +265,12 @@ namespace SardaelEditor
             return resultado;
         }
 
-        static VarianteDeExecucao[] CarregarVariantesDeExecucao()
+        public static VarianteDeExecucao[] CarregarVariantesDeExecucao()
         {
-            var resultado = new VarianteDeExecucao[ExecucoesEscolhidas.Length];
-            for (int i = 0; i < resultado.Length; i++)
+            var resultado = new VarianteDeExecucao[ExecucoesNoChao.Length + ExecucoesEmPe.Length];
+            for (int i = 0; i < ExecucoesNoChao.Length; i++)
             {
-                string baseDoNome = ExecucoesEscolhidas[i];
+                string baseDoNome = ExecucoesNoChao[i];
                 var executor = CarregarControllerDeExecucao(baseDoNome, "_Att");
                 var vitima = CarregarControllerDeExecucao(baseDoNome, "_Vic");
                 if (executor == null || vitima == null)
@@ -243,10 +283,35 @@ namespace SardaelEditor
                     baseDoNome,
                     executor,
                     vitima,
-                    DistanciasDasExecucoes[i],
-                    ImpactosDasExecucoes[i],
-                    DuracoesDasExecucoes[i],
-                    DecapitacoesDasExecucoes[i]);
+                    PosturaDeExecucao.NoChao,
+                    0.991f,
+                    0f,
+                    ImpactosNoChao[i],
+                    DuracoesNoChao[i],
+                    DecapitacoesNoChao[i]);
+            }
+
+            for (int i = 0; i < ExecucoesEmPe.Length; i++)
+            {
+                string baseDoNome = ExecucoesEmPe[i];
+                var executor = CarregarControllerDeExecucaoEmPe(baseDoNome, false);
+                var vitima = CarregarControllerDeExecucaoEmPe(baseDoNome, true);
+                if (executor == null || vitima == null)
+                {
+                    Debug.LogError("[Combate Sandbox] par de execucao em pe ausente: " + baseDoNome);
+                    return null;
+                }
+
+                int indice = ExecucoesNoChao.Length + i;
+                resultado[indice] = new VarianteDeExecucao(
+                    baseDoNome,
+                    executor,
+                    vitima,
+                    PosturaDeExecucao.EmPe,
+                    1.756f,
+                    0.041f,
+                    ImpactosEmPe[i],
+                    DuracoesEmPe[i]);
             }
             return resultado;
         }
@@ -255,6 +320,13 @@ namespace SardaelEditor
         {
             return AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
                 PastaControllersDeExecucao + nome + papel + ".controller");
+        }
+
+        static RuntimeAnimatorController CarregarControllerDeExecucaoEmPe(string nome, bool reacao)
+        {
+            return AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
+                PastaControllersDeExecucaoEmPe + nome +
+                (reacao ? "_React_RM.controller" : "_RM.controller"));
         }
 
         static AnimationClip[] CarregarAnimacoesDeMorte()
@@ -285,31 +357,33 @@ namespace SardaelEditor
             var chao = GameObject.CreatePrimitive(PrimitiveType.Cube);
             chao.name = "Chao";
             chao.transform.position = new Vector3(0f, -0.5f, 0f);
-            chao.transform.localScale = new Vector3(36f, 1f, 4f);
+            chao.transform.localScale = new Vector3(24f, 1f, 14f);
 
-            CriarLimite("LimiteEsquerdo", -18f);
-            CriarLimite("LimiteDireito", 18f);
+            CriarLimite("LimiteEsquerdo", new Vector3(-12f, 1.5f, 0f), new Vector3(0.4f, 4f, 14f));
+            CriarLimite("LimiteDireito", new Vector3(12f, 1.5f, 0f), new Vector3(0.4f, 4f, 14f));
+            CriarLimite("LimiteFundo", new Vector3(0f, 1.5f, 7f), new Vector3(24f, 4f, 0.4f));
+            CriarLimite("LimiteFrente", new Vector3(0f, 1.5f, -7f), new Vector3(24f, 4f, 0.4f));
 
             for (int x = -16; x <= 16; x += 2)
             {
                 if (x == 0) continue;
                 var marco = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 marco.name = "Marco_" + x;
-                marco.transform.position = new Vector3(x, 0.05f, 1.8f);
+                marco.transform.position = new Vector3(x, 0.05f, 5.8f);
                 marco.transform.localScale = new Vector3(0.05f, 0.1f, 0.4f);
                 Object.DestroyImmediate(marco.GetComponent<Collider>());
             }
         }
 
-        static void CriarLimite(string nome, float x)
+        static void CriarLimite(string nome, Vector3 posicao, Vector3 escala)
         {
             var limite = GameObject.CreatePrimitive(PrimitiveType.Cube);
             limite.name = nome;
-            limite.transform.position = new Vector3(x, 1.5f, 0f);
-            limite.transform.localScale = new Vector3(0.4f, 4f, 4f);
+            limite.transform.position = posicao;
+            limite.transform.localScale = escala;
         }
 
-        static void CriarInimigo(
+        static AlvoDeCombate CriarInimigo(
             GameObject prefab,
             RuntimeAnimatorController controller,
             RegistroDeCombate registro,
@@ -317,13 +391,13 @@ namespace SardaelEditor
             GameObject fxSangue,
             GameObject cabecaDecepada,
             string nome,
-            float x)
+            Vector3 posicao)
         {
             var inimigo = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             inimigo.name = nome;
-            inimigo.transform.SetPositionAndRotation(
-                new Vector3(x, 0f, 0f),
-                Quaternion.Euler(0f, x < 0f ? 90f : -90f, 0f));
+            Vector3 paraJogador = jogador.position - posicao;
+            paraJogador.y = 0f;
+            inimigo.transform.SetPositionAndRotation(posicao, Quaternion.LookRotation(paraJogador));
             RemoverLegado(inimigo);
 
             var animator = inimigo.GetComponent<Animator>();
@@ -362,6 +436,7 @@ namespace SardaelEditor
             efeito.quantidade = 12f;
             efeito.tamanho = 3.2f;
             efeito.alcance = 2f;
+            return alvo;
         }
 
         static InputActionAsset GarantirAcoesEspeciais(InputActionAsset input)
@@ -380,14 +455,20 @@ namespace SardaelEditor
             {
                 var acao = mapa.AddAction("FlowSpecial", InputActionType.Button);
                 acao.AddBinding("<Keyboard>/r", groups: "Keyboard&Mouse");
-                acao.AddBinding("<Gamepad>/leftShoulder", groups: "Gamepad");
+                acao.AddBinding("<Gamepad>/rightTrigger", groups: "Gamepad");
             }
             if (mapa.FindAction("Block", false) == null)
             {
                 var acao = mapa.AddAction("Block", InputActionType.Button);
                 acao.AddBinding("<Keyboard>/f", groups: "Keyboard&Mouse");
                 acao.AddBinding("<Mouse>/rightButton", groups: "Keyboard&Mouse");
-                acao.AddBinding("<Gamepad>/leftTrigger", groups: "Gamepad");
+                acao.AddBinding("<Gamepad>/leftShoulder", groups: "Gamepad");
+            }
+            if (mapa.FindAction("Dodge", false) == null)
+            {
+                var acao = mapa.AddAction("Dodge", InputActionType.Button);
+                acao.AddBinding("<Keyboard>/leftCtrl", groups: "Keyboard&Mouse");
+                acao.AddBinding("<Gamepad>/buttonEast", groups: "Gamepad");
             }
             File.WriteAllText(InputActions, input.ToJson());
             AssetDatabase.ImportAsset(InputActions, ImportAssetOptions.ForceUpdate);
@@ -412,6 +493,7 @@ namespace SardaelEditor
             GarantirParametro(controllerHeroi, "bloqueando", AnimatorControllerParameterType.Bool);
             GarantirParametro(controllerHeroi, "contraAtacar", AnimatorControllerParameterType.Trigger);
             GarantirParametro(controllerHeroi, "morrer", AnimatorControllerParameterType.Trigger);
+            MontarEsquivaDirecional.Configurar(controllerHeroi);
 
             var maquinaHeroi = controllerHeroi.layers[0].stateMachine;
             var locomocao = EncontrarEstado(maquinaHeroi, "Locomocao");
@@ -539,14 +621,19 @@ namespace SardaelEditor
             transicao.AddCondition(modo, 0f, parametro);
         }
 
-        static void CriarCamera(Transform heroi)
+        static void CriarCamera(
+            Transform heroi,
+            RegistroDeCombate registro,
+            CombateDoHeroi combate,
+            out CameraLateral lateral,
+            out CameraDeCombate cameraDeCombate)
         {
             var objeto = new GameObject("CameraLateral");
             objeto.tag = "MainCamera";
             var camera = objeto.AddComponent<Camera>();
             camera.fieldOfView = 50f;
             objeto.AddComponent<AudioListener>();
-            var lateral = objeto.AddComponent<CameraLateral>();
+            lateral = objeto.AddComponent<CameraLateral>();
             lateral.alvo = heroi;
             lateral.acharSozinho = false;
             lateral.distancia = 12.5f;
@@ -554,6 +641,19 @@ namespace SardaelEditor
             lateral.olharAFrente = 0.8f;
             lateral.xMinimo = -14f;
             lateral.xMaximo = 14f;
+            cameraDeCombate = objeto.AddComponent<CameraDeCombate>();
+            cameraDeCombate.Configurar(heroi, registro, combate, lateral);
+            cameraDeCombate.enabled = false;
+        }
+
+        static void CriarEncontro(ModoDeCombate modo, AlvoDeCombate[] inimigos)
+        {
+            var objeto = new GameObject("Encontro_FreeFlow");
+            objeto.transform.position = new Vector3(-5.5f, 1.5f, 0f);
+            var volume = objeto.AddComponent<BoxCollider>();
+            volume.isTrigger = true;
+            volume.size = new Vector3(1f, 3f, 12f);
+            objeto.AddComponent<EncontroDeCombate>().Configurar(modo, inimigos);
         }
 
         static void RemoverLegado(GameObject raiz)

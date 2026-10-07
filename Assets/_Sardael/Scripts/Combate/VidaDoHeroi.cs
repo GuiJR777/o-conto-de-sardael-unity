@@ -15,6 +15,7 @@ namespace Sardael
 
         Coroutine reacao;
         float vidaAtual;
+        float invulneravelAte;
         bool vivo = true;
 
         static readonly int Atingido = Animator.StringToHash("atingido");
@@ -24,6 +25,7 @@ namespace Sardael
         public float Maxima => vidaMaxima;
         public float Normalizada => vidaMaxima <= 0f ? 0f : vidaAtual / vidaMaxima;
         public bool Vivo => vivo;
+        public bool Invulneravel => vivo && Time.time < invulneravelAte;
         public int GolpesRecebidos { get; private set; }
         public int GolpesBloqueados { get; private set; }
 
@@ -51,7 +53,7 @@ namespace Sardael
 
         public bool ReceberAtaque(MotorDeCombateDoInimigo atacante, float dano)
         {
-            if (!vivo) return false;
+            if (!vivo || Invulneravel) return false;
             if (defesa != null && defesa.TentarBloquear(atacante))
             {
                 GolpesBloqueados++;
@@ -77,9 +79,16 @@ namespace Sardael
         {
             vivo = true;
             vidaAtual = vidaMaxima;
+            invulneravelAte = 0f;
             defesa?.Reativar();
             movimento?.Travar(this, false);
             if (animator != null) animator.Play("Locomocao", 0, 0f);
+        }
+
+        public void ConcederInvulnerabilidade(float duracao)
+        {
+            if (!vivo) return;
+            invulneravelAte = Mathf.Max(invulneravelAte, Time.time + Mathf.Max(0f, duracao));
         }
 
         void MorrerAgora()

@@ -24,17 +24,23 @@ namespace Sardael
         int eloAtual;
         int eloPendente;
         int ladoEscolhido = 1;
+        Vector3 direcaoEscolhida = Vector3.right;
         float lungePercorrido;
         bool impactoResolvido;
+        readonly string[] ultimosAlvosPorElo = new string[5];
 
         public AlvoDeCombate AlvoAtual => alvoAtual;
         public int EloAtual => eloAtual;
         public int LadoEscolhido => ladoEscolhido;
+        public Vector3 DirecaoEscolhida => direcaoEscolhida;
         public float DistanciaDoAlvo => alvoAtual == null
             ? -1f
-            : Mathf.Abs(alvoAtual.transform.position.x - transform.position.x);
+            : RegistroDeCombate.DistanciaPlanar(alvoAtual.transform.position, transform.position);
         public bool EmAtaque => eloAtual > 0 || eloPendente > 0 || EloDoEstadoAtual() > 0;
         public int CancelamentosDefensivos { get; private set; }
+        public string UltimoAlvoDoElo(int elo) => elo >= 1 && elo < ultimosAlvosPorElo.Length
+            ? (string.IsNullOrEmpty(ultimosAlvosPorElo[elo]) ? "-" : ultimosAlvosPorElo[elo])
+            : "-";
 
         public void Configurar(
             MovimentoDoHeroi novoMovimento,
@@ -65,6 +71,7 @@ namespace Sardael
             LimparComboEncerrado();
             AtualizarAtaqueAtivo();
             AtualizarLunge();
+            AtualizarOrientacao();
         }
 
         void SolicitarAtaque()
@@ -76,18 +83,19 @@ namespace Sardael
             if (proximoElo > ataques.Length || Definicao(proximoElo) == null) return;
             if (eloPendente == proximoElo) return;
 
-            float moveX = entrada == null ? 0f : entrada.MoveX;
-            ladoEscolhido = Mathf.Abs(moveX) > zonaMortaDaDirecao
-                ? (moveX > 0f ? 1 : -1)
-                : movimento.Olhando;
+            Vector2 movimentoLido = entrada == null ? Vector2.zero : entrada.Movimento;
+            Vector3 direcaoDeEntrada = new Vector3(movimentoLido.x, 0f, movimentoLido.y);
 
             eloPendente = proximoElo;
             ataquePendente = Definicao(proximoElo);
-            alvoPendente = registro == null
-                ? null
-                : registro.PrimeiroNoLado(transform.position, ladoEscolhido);
+            alvoPendente = EscolherAlvo(direcaoDeEntrada, alvoAtual);
 
-            if (eloNoAnimator <= 0) movimento.DefinirDirecaoDeCombate(ladoEscolhido);
+            if (alvoPendente != null)
+            {
+                direcaoEscolhida = DirecaoPlanarAte(alvoPendente.transform.position);
+                ladoEscolhido = direcaoEscolhida.x < 0f ? -1 : 1;
+                if (eloNoAnimator <= 0) movimento.DefinirDirecaoDeCombate(direcaoEscolhida);
+            }
             animator.SetTrigger(P_ATACAR);
         }
 
@@ -97,6 +105,7 @@ namespace Sardael
             eloAtual = 0;
             ataqueAtual = null;
             alvoAtual = null;
+            movimento?.DefinirAlvoContextualDeCombate(null);
             impactoResolvido = false;
             lungePercorrido = 0f;
         }
@@ -117,16 +126,20 @@ namespace Sardael
             }
             else
             {
-                alvoAtual = registro == null
-                    ? null
-                    : registro.PrimeiroNoLado(transform.position, movimento.Olhando);
+                Vector2 movimentoLido = entrada == null ? Vector2.zero : entrada.Movimento;
+                alvoAtual = EscolherAlvo(
+                    new Vector3(movimentoLido.x, 0f, movimentoLido.y), alvoAtual);
             }
 
             if (alvoAtual != null)
             {
-                ladoEscolhido = alvoAtual.transform.position.x >= transform.position.x ? 1 : -1;
-                movimento.DefinirDirecaoDeCombate(ladoEscolhido);
+                direcaoEscolhida = DirecaoPlanarAte(alvoAtual.transform.position);
+                ladoEscolhido = direcaoEscolhida.x < 0f ? -1 : 1;
+                movimento.DefinirDirecaoDeCombate(direcaoEscolhida);
+                movimento.DefinirAlvoContextualDeCombate(alvoAtual.transform);
             }
+            if (eloAtual >= 1 && eloAtual < ultimosAlvosPorElo.Length)
+                ultimosAlvosPorElo[eloAtual] = alvoAtual == null ? "-" : alvoAtual.name;
 
             lungePercorrido = 0f;
             impactoResolvido = false;
@@ -142,8 +155,13 @@ namespace Sardael
 
         public bool CancelarParaDefesa(int direcao)
         {
-            if (!EmAtaque || direcao == 0 || movimento == null || direcao == movimento.Olhando)
-                return false;
+            return CancelarParaDefesa(new Vector3(direcao, 0f, 0f));
+        }
+
+        public bool CancelarParaDefesa(Vector3 direcao)
+        {
+            direcao.y = 0f;
+            if (!EmAtaque || direcao.sqrMagnitude <= 0.0001f || movimento == null) return false;
 
             eloAtual = 0;
             eloPendente = 0;
@@ -151,6 +169,7 @@ namespace Sardael
             ataquePendente = null;
             alvoAtual = null;
             alvoPendente = null;
+            movimento.DefinirAlvoContextualDeCombate(null);
             impactoResolvido = true;
             lungePercorrido = 0f;
             entrada?.CancelarAtaquesPendentes();
@@ -189,8 +208,9 @@ namespace Sardael
             var ataque = eloAtual > 0 ? ataqueAtual : (eloPendente == 1 ? ataquePendente : null);
             if (alvo == null || ataque == null || !alvo.Valido || movimento == null) return;
 
-            float delta = alvo.transform.position.x - transform.position.x;
-            float distancia = Mathf.Abs(delta);
+            Vector3 delta = alvo.transform.position - transform.position;
+            delta.y = 0f;
+            float distancia = delta.magnitude;
             if (distancia > ataque.alcanceMagnetismo || distancia <= ataque.distanciaDesejada) return;
 
             float maximoRestante = Mathf.Max(0f, ataque.alcanceMagnetismo - ataque.distanciaDesejada - lungePercorrido);
@@ -198,9 +218,37 @@ namespace Sardael
             float passo = Mathf.Min(ataque.velocidadeAproximacao * Time.deltaTime, ateADistancia, maximoRestante);
             if (passo <= 0f) return;
 
-            int direcao = delta > 0f ? 1 : -1;
+            Vector3 direcao = delta / distancia;
             movimento.DefinirDirecaoDeCombate(direcao);
-            if (movimento.AdicionarDeslocamentoDeCombate(passo * direcao)) lungePercorrido += passo;
+            if (movimento.AdicionarDeslocamentoDeCombate(direcao * passo)) lungePercorrido += passo;
+        }
+
+        void AtualizarOrientacao()
+        {
+            var alvo = alvoAtual != null && alvoAtual.Valido ? alvoAtual : alvoPendente;
+            if (alvo == null || !alvo.Valido || movimento == null) return;
+            direcaoEscolhida = DirecaoPlanarAte(alvo.transform.position);
+            movimento.DefinirDirecaoDeCombate(direcaoEscolhida);
+            movimento.DefinirAlvoContextualDeCombate(alvo.transform);
+        }
+
+        AlvoDeCombate EscolherAlvo(Vector3 direcaoDeEntrada, AlvoDeCombate anterior)
+        {
+            if (registro == null) return null;
+            Vector3 frente = movimento != null && movimento.EmModoCombate
+                ? transform.forward
+                : new Vector3(movimento == null ? 1f : movimento.Olhando, 0f, 0f);
+            if (direcaoDeEntrada.sqrMagnitude < zonaMortaDaDirecao * zonaMortaDaDirecao)
+                direcaoDeEntrada = Vector3.zero;
+            return registro.MelhorAlvoNaDirecao(
+                transform.position, direcaoDeEntrada, frente, anterior);
+        }
+
+        Vector3 DirecaoPlanarAte(Vector3 destino)
+        {
+            Vector3 direcao = destino - transform.position;
+            direcao.y = 0f;
+            return direcao.sqrMagnitude <= 0.0001f ? transform.forward : direcao.normalized;
         }
 
         int EloDoEstadoAtual()

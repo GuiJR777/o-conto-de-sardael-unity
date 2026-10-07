@@ -125,6 +125,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "Dodge",
+                    "type": "Button",
+                    "id": "e8524789-75fc-49d7-bcf3-adffdff1ac9c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -549,7 +559,7 @@
                 {
                     "name": "",
                     "id": "fe88c657-e191-4fd0-bde9-0cc33556bd95",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -582,11 +592,33 @@
                 {
                     "name": "",
                     "id": "4a236028-a61c-438b-a811-97946d400560",
-                    "path": "<Gamepad>/leftTrigger",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Block",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d43712fe-6af2-4f51-8faa-a6f76da0c8d4",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Dodge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b92d7ab-1582-49ff-9b32-d7942b88d350",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Dodge",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

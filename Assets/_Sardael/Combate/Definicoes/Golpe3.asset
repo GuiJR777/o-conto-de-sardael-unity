@@ -15,10 +15,10 @@ MonoBehaviour:
   id: golpe_3
   eloCombo: 3
   alcance: 1.756
-  alcanceMagnetismo: 4.75
+  alcanceMagnetismo: 8.5
   alcanceMultiAlvo: 4
   distanciaDesejada: 1.45
-  velocidadeAproximacao: 10
+  velocidadeAproximacao: 14
   dano: 20
   poise: 25
   padraoDeAlvo: 1

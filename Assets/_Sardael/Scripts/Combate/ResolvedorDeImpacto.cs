@@ -31,7 +31,8 @@ namespace Sardael
             atingidos.Clear();
             UltimaQuantidadeDeAcertos = 0;
             if (ataque == null || atacante == null || alvo == null || !alvo.Valido) return false;
-            float distancia = Mathf.Abs(alvo.transform.position.x - atacante.position.x);
+            float distancia = RegistroDeCombate.DistanciaPlanar(
+                alvo.transform.position, atacante.position);
             if (distancia > ataque.alcance + tolerancia) return false;
 
             UltimoPadrao = ataque.padraoDeAlvo;
@@ -40,17 +41,16 @@ namespace Sardael
             switch (ataque.padraoDeAlvo)
             {
                 case PadraoDeAlvo.FrontTwo:
-                    AdicionarDaFrente(ataque, atacante.position, alvo, 2);
+                    AdicionarNoCone(ataque, atacante.position, alvo, 2, false);
                     break;
                 case PadraoDeAlvo.FrontThree:
-                    AdicionarDaFrente(ataque, atacante.position, alvo, 3);
+                    AdicionarNoCone(ataque, atacante.position, alvo, 3, false);
                     break;
                 case PadraoDeAlvo.BothSides:
-                    Adicionar(registro == null ? null : registro.PrimeiroNoLadoOposto(atacante.position, alvo),
-                        ataque, atacante.position, true);
+                    AdicionarNoCone(ataque, atacante.position, alvo, 2, true);
                     break;
                 case PadraoDeAlvo.Piercing:
-                    AdicionarDaFrente(ataque, atacante.position, alvo, int.MaxValue);
+                    AdicionarNoCone(ataque, atacante.position, alvo, int.MaxValue, false);
                     break;
             }
 
@@ -64,19 +64,20 @@ namespace Sardael
             return UltimaQuantidadeDeAcertos > 0;
         }
 
-        void AdicionarDaFrente(
+        void AdicionarNoCone(
             DefinicaoDeAtaque ataque,
             Vector3 origem,
             AlvoDeCombate alvoPrimario,
-            int maximo)
+            int maximo,
+            bool ladoOposto)
         {
             if (registro == null || atingidos.Count >= maximo) return;
-            int lado = alvoPrimario.transform.position.x >= origem.x ? 1 : -1;
-            registro.PreencherLado(origem, lado, candidatos);
-            int indicePrimario = candidatos.IndexOf(alvoPrimario);
-            if (indicePrimario < 0) indicePrimario = 0;
-
-            for (int i = indicePrimario; i < candidatos.Count && atingidos.Count < maximo; i++)
+            Vector3 direcao = alvoPrimario.transform.position - origem;
+            direcao.y = 0f;
+            if (ladoOposto) direcao = -direcao;
+            registro.PreencherNoCone(
+                origem, direcao, ataque.alcanceMultiAlvo + tolerancia, 0.15f, candidatos);
+            for (int i = 0; i < candidatos.Count && atingidos.Count < maximo; i++)
                 Adicionar(candidatos[i], ataque, origem, true);
         }
 
@@ -88,7 +89,8 @@ namespace Sardael
         {
             if (alvo == null || !alvo.Valido || atingidos.Contains(alvo)) return;
             float limite = secundario ? ataque.alcanceMultiAlvo : ataque.alcance;
-            if (Mathf.Abs(alvo.transform.position.x - origem.x) > limite + tolerancia) return;
+            if (RegistroDeCombate.DistanciaPlanar(alvo.transform.position, origem) > limite + tolerancia)
+                return;
             atingidos.Add(alvo);
         }
 
@@ -97,14 +99,17 @@ namespace Sardael
             var movimento = atacante.GetComponent<MovimentoDoHeroi>();
             if (movimento == null || ataque.distanciaDeslocamento <= 0f) return;
             if (pushDoJogador != null) StopCoroutine(pushDoJogador);
-            float direcao = atacante.position.x < alvo.position.x ? -1f : 1f;
+            Vector3 direcao = atacante.position - alvo.position;
+            direcao.y = 0f;
+            if (direcao.sqrMagnitude <= 0.0001f) direcao = -atacante.forward;
+            direcao.Normalize();
             pushDoJogador = StartCoroutine(RotinaPushDoJogador(
                 movimento, direcao, ataque.distanciaDeslocamento, ataque.velocidadeDeslocamento));
         }
 
         IEnumerator RotinaPushDoJogador(
             MovimentoDoHeroi movimento,
-            float direcao,
+            Vector3 direcao,
             float distancia,
             float velocidade)
         {

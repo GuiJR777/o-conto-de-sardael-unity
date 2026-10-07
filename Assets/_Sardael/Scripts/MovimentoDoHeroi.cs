@@ -5,6 +5,13 @@ using UnityEngine.InputSystem;
 
 namespace Sardael
 {
+    public enum ModoMovimentoHeroi
+    {
+        Exploracao,
+        Combate,
+        RetornoALinha
+    }
+
     /// <summary>
     /// Movimento do Sardael, travado na linha 2.5D. SO' MOVIMENTO — combate nao entra aqui.
     ///
@@ -40,6 +47,8 @@ namespace Sardael
         public const string P_NO_CHAO    = "noChao";
         public const string P_PULAR      = "pular";
         public const string P_ESQUIVAR   = "esquivar";
+        public const string P_ESQUIVA_HORIZONTAL = "esquivaHorizontal";
+        public const string P_ESQUIVA_VERTICAL   = "esquivaVertical";
         public const string P_ROLAR      = "rolar";
         public const string P_ARRANCAR   = "arrancar";
 
@@ -85,6 +94,13 @@ namespace Sardael
         public bool usarLimites = true;
         public float xMinimo = -38f, xMaximo = 38f;   // o chao tem 80 m; a trava batia em 24 e ele parava no nada
 
+        [Header("Free Flow 3D")]
+        [SerializeField] EntradaDeCombate entrada;
+        [SerializeField, Min(0.1f)] float velocidadeDeCombate = 4.2f;
+        [SerializeField, Min(0.1f)] float aceleracaoDeCombate = 18f;
+        [SerializeField, Min(0.1f)] float velocidadeDeRetornoALinha = 6f;
+        [SerializeField, Min(0.001f)] float toleranciaDaLinha = 0.025f;
+
         [Header("Depuracao")]
         public bool mostrarPainel = true;
 
@@ -121,8 +137,15 @@ namespace Sardael
         public bool Travado { get { return bloqueado || travas.Count > 0; } }
 
         public bool NoChao { get; private set; }
-        public float VelocidadeAtual { get { return Mathf.Abs(velX); } }
+        public float VelocidadeAtual => modoAtual == ModoMovimentoHeroi.Exploracao
+            ? Mathf.Abs(velX)
+            : velocidadePlanar.magnitude;
         public int Olhando { get { return olhando; } }
+        public ModoMovimentoHeroi ModoAtual => modoAtual;
+        public bool EmModoCombate => modoAtual == ModoMovimentoHeroi.Combate;
+        public bool RetornoConcluido => modoAtual != ModoMovimentoHeroi.RetornoALinha ||
+            Mathf.Abs(transform.position.z - zDeRetorno) <= toleranciaDaLinha;
+        public Vector2 MovimentoLido { get; private set; }
 
         /// <summary>
         /// Uma habilidade esta' rodando? Quem responde e' o Animator, pelo TAG do estado.
@@ -162,15 +185,26 @@ namespace Sardael
         CharacterController cc;
         Animator anim;
         float velX, velY;
+        Vector3 velocidadePlanar;
         int olhando = 1;
         float saiuDoChaoEm = -99f;
         Vector3 deslocamentoDaAnimacao;
-        float deslocamentoDeCombateX;
+        Vector3 deslocamentoDeCombate;
+        Vector3 direcaoDeCombate = Vector3.right;
+        Transform alvoContextualDeCombate;
+        ModoMovimentoHeroi modoAtual = ModoMovimentoHeroi.Exploracao;
+        float zDeRetorno;
+        RuntimeAnimatorController controladorComParametrosConhecidos;
+        bool temVelocidade;
+        bool temNoChao;
+        bool temEsquivaHorizontal;
+        bool temEsquivaVertical;
 
         void Awake()
         {
             cc = GetComponent<CharacterController>();
             anim = GetComponent<Animator>();
+            if (entrada == null) entrada = GetComponent<EntradaDeCombate>();
             anim.applyRootMotion = true;
 
             // LER O VETOR, NAO RECALCULAR O ANGULO.
@@ -197,8 +231,9 @@ namespace Sardael
         {
             float dt = Time.deltaTime;
 
-            float eixo; bool correndo, pulou, esquivou, rolou, arrancou;
+            Vector2 eixo; bool correndo, pulou, esquivou, rolou, arrancou;
             LerEntrada(out eixo, out correndo, out pulou, out esquivou, out rolou, out arrancou);
+            MovimentoLido = eixo;
 
             NoChao = cc.isGrounded;
             if (NoChao)
@@ -208,26 +243,55 @@ namespace Sardael
             }
 
             bool ocupado = EmAcao;
+            AtualizarConhecimentoDosParametros();
 
             // ---- habilidades: so' pedem, quem executa e' o Animator ----
             if (!ocupado && NoChao)
             {
-                if (esquivou) { anim.SetTrigger(P_ESQUIVAR); velX = 0f; }
+                if (esquivou)
+                {
+                    Vector2 direcaoDaEsquiva = EmModoCombate
+                        ? CalcularDirecaoDaEsquiva(eixo)
+                        : Vector2.down;
+                    if (temEsquivaHorizontal)
+                        anim.SetFloat(P_ESQUIVA_HORIZONTAL, direcaoDaEsquiva.x);
+                    if (temEsquivaVertical)
+                        anim.SetFloat(P_ESQUIVA_VERTICAL, direcaoDaEsquiva.y);
+                    anim.SetTrigger(P_ESQUIVAR);
+                    velX = 0f;
+                    velocidadePlanar = Vector3.zero;
+                    // O estado so' entra na avaliacao do Animator no fim do quadro. Sem isto,
+                    // a locomocao abaixo ainda usa o analogico da esquiva e gira o corpo,
+                    // fazendo um dodge lateral virar outro recuo em relacao ao novo facing.
+                    ocupado = true;
+                }
                 else if (rolou) { anim.SetTrigger(P_ROLAR); velX = 0f; }
                 else if (arrancou) { anim.SetTrigger(P_ARRANCAR); velX = 0f; }
             }
 
             // ---- andar ----
-            if (ocupado)
+            if (ocupado || modoAtual == ModoMovimentoHeroi.RetornoALinha)
             {
                 velX = 0f;   // durante a habilidade quem desloca e' o clipe
+                velocidadePlanar = Vector3.zero;
+            }
+            else if (EmModoCombate)
+            {
+                Vector3 intencao = Vector3.ClampMagnitude(new Vector3(eixo.x, 0f, eixo.y), 1f);
+                float rapidez = correndo ? velocidadeCorrer : velocidadeDeCombate;
+                velocidadePlanar = Vector3.MoveTowards(
+                    velocidadePlanar, intencao * rapidez, aceleracaoDeCombate * dt);
+                velX = 0f;
+                if (alvoContextualDeCombate == null && intencao.sqrMagnitude > 0.01f)
+                    DefinirDirecaoDeCombate(intencao);
             }
             else
             {
                 float peso = NoChao ? 1f : controleNoAr;
-                float alvo = eixo * (correndo ? velocidadeCorrer : velocidadeAndar);
+                float alvo = eixo.x * (correndo ? velocidadeCorrer : velocidadeAndar);
                 velX = Mathf.MoveTowards(velX, alvo, aceleracao * peso * dt);
-                if (Mathf.Abs(eixo) > 0.01f) olhando = eixo > 0f ? 1 : -1;
+                velocidadePlanar = Vector3.zero;
+                if (Mathf.Abs(eixo.x) > 0.01f) olhando = eixo.x > 0f ? 1 : -1;
             }
 
             // ---- pular ----
@@ -245,8 +309,8 @@ namespace Sardael
             velY += gravidade * dt;
 
             // ---- contar pro Animator o que esta' acontecendo ----
-            anim.SetFloat(P_VELOCIDADE, Mathf.Abs(velX));
-            anim.SetBool(P_NO_CHAO, podePular);
+            if (temVelocidade) anim.SetFloat(P_VELOCIDADE, VelocidadeAtual);
+            if (temNoChao) anim.SetBool(P_NO_CHAO, podePular);
 
             Mover(dt);
         }
@@ -258,33 +322,66 @@ namespace Sardael
         /// que faltava quando eu usava um grafo de Playables proprio, onde ele vinha zerado e
         /// o corpo derivava pra fora do personagem.
         ///
-        /// So' o X importa: o Z do clipe seria profundidade, e nao existe profundidade aqui.
+        /// Na exploracao so' o X importa. No Free Flow, o delta mundial X/Z acompanha a
+        /// orientacao dada ao personagem antes da habilidade.
         /// </summary>
         void OnAnimatorMove()
         {
             if (anim == null) return;
             if (!EmAcao) return;                  // na locomocao quem anda e' velX
-            deslocamentoDaAnimacao.x += anim.deltaPosition.x;
+            if (EmModoCombate)
+            {
+                Vector3 delta = anim.deltaPosition;
+                delta.y = 0f;
+                deslocamentoDaAnimacao += delta;
+            }
+            else if (modoAtual == ModoMovimentoHeroi.Exploracao)
+                deslocamentoDaAnimacao.x += anim.deltaPosition.x;
         }
 
         void Mover(float dt)
         {
-            float passoDaAnimacao = deslocamentoDaAnimacao.x;
-            deslocamentoDaAnimacao.x = 0f;
-            float passoDoCombate = deslocamentoDeCombateX;
-            deslocamentoDeCombateX = 0f;
+            Vector3 passo = deslocamentoDeCombate;
+            deslocamentoDeCombate = Vector3.zero;
 
-            cc.Move(new Vector3(velX * dt + passoDaAnimacao + passoDoCombate, velY * dt, 0f));
+            if (modoAtual == ModoMovimentoHeroi.Exploracao)
+                passo += new Vector3(velX * dt + deslocamentoDaAnimacao.x, 0f, 0f);
+            else if (modoAtual == ModoMovimentoHeroi.Combate)
+                passo += velocidadePlanar * dt + new Vector3(
+                    deslocamentoDaAnimacao.x, 0f, deslocamentoDaAnimacao.z);
+            else
+            {
+                float erro = zDeRetorno - transform.position.z;
+                float passoZ = Mathf.Clamp(
+                    erro, -velocidadeDeRetornoALinha * dt, velocidadeDeRetornoALinha * dt);
+                passo += new Vector3(0f, 0f, passoZ);
+            }
+            deslocamentoDaAnimacao = Vector3.zero;
+            passo.y = velY * dt;
+            cc.Move(passo);
 
-            // travar na linha: e' isto que faz o jogo ser 2.5D
-            var p = transform.position;
-            p.z = zDaLinha;
-            if (usarLimites) p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
-            transform.position = p;
+            if (modoAtual == ModoMovimentoHeroi.Exploracao)
+            {
+                // Fora do encontro a regra 2.5D continua absoluta.
+                var p = transform.position;
+                p.z = zDaLinha;
+                if (usarLimites) p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
+                transform.position = p;
+            }
+            else if (usarLimites)
+            {
+                var p = transform.position;
+                p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
+                transform.position = p;
+            }
 
-            float grausAlvo = olhando > 0 ? 90f : -90f;
+            Quaternion rotacaoAlvo;
+            if (modoAtual == ModoMovimentoHeroi.Exploracao)
+                rotacaoAlvo = Quaternion.Euler(0f, olhando > 0 ? 90f : -90f, 0f);
+            else
+                rotacaoAlvo = Quaternion.LookRotation(direcaoDeCombate, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(
-                transform.rotation, Quaternion.Euler(0f, grausAlvo, 0f), giroPorSegundo * dt);
+                transform.rotation, rotacaoAlvo, giroPorSegundo * dt);
         }
 
         // ---------------------------------------------------------------- teclado de mentira
@@ -295,10 +392,11 @@ namespace Sardael
         //
         // Os gatilhos ficam ligados ate' serem lidos — assim nao se perdem se o script de
         // teste rodar depois deste no quadro.
-        float eixoDeFora; bool correrDeFora;
+        Vector2 eixoDeFora; bool correrDeFora;
         bool puloDeFora, esquivaDeFora, rolarDeFora, arrancoDeFora;
 
-        public void InjetarEixo(float v)   { eixoDeFora = v; }
+        public void InjetarEixo(float v)   { eixoDeFora.x = v; }
+        public void InjetarMovimento(Vector2 v) { eixoDeFora = Vector2.ClampMagnitude(v, 1f); }
         public void InjetarCorrer(bool v)  { correrDeFora = v; }
         public void InjetarPulo()          { puloDeFora = true; }
         public void InjetarEsquiva()       { esquivaDeFora = true; }
@@ -306,39 +404,133 @@ namespace Sardael
         public void InjetarArranco()       { arrancoDeFora = true; }
 
         /// <summary>
-        /// Acrescenta a correcao horizontal do combate ao mesmo pipeline do root motion.
+        /// Acrescenta uma correcao planar ao mesmo pipeline do root motion.
         /// O deslocamento e consumido por <see cref="CharacterController.Move(Vector3)"/>.
         /// </summary>
         public bool AdicionarDeslocamentoDeCombate(float deltaX)
         {
-            if (Travado || !isActiveAndEnabled || Mathf.Approximately(deltaX, 0f)) return false;
-            deslocamentoDeCombateX += deltaX;
+            return AdicionarDeslocamentoDeCombate(new Vector3(deltaX, 0f, 0f));
+        }
+
+        public bool AdicionarDeslocamentoDeCombate(Vector3 deltaPlanar)
+        {
+            deltaPlanar.y = 0f;
+            if (Travado || !isActiveAndEnabled || deltaPlanar.sqrMagnitude <= 0.0000001f)
+                return false;
+            deslocamentoDeCombate += deltaPlanar;
             return true;
         }
 
         public void CancelarDeslocamentoDeCombate()
         {
             velX = 0f;
+            velocidadePlanar = Vector3.zero;
             deslocamentoDaAnimacao = Vector3.zero;
-            deslocamentoDeCombateX = 0f;
+            deslocamentoDeCombate = Vector3.zero;
         }
 
         /// <summary>Permite ao targeting orientar Sardael sem mover ou teleportar o corpo.</summary>
         public bool DefinirDirecaoDeCombate(int direcao)
         {
-            if (Travado || direcao == 0) return false;
+            if (direcao == 0) return false;
             olhando = direcao < 0 ? -1 : 1;
+            direcaoDeCombate = new Vector3(olhando, 0f, 0f);
             return true;
         }
 
-        void LerEntrada(out float eixo, out bool correndo, out bool pulou,
+        public bool DefinirDirecaoDeCombate(Vector3 direcao)
+        {
+            direcao.y = 0f;
+            if (direcao.sqrMagnitude <= 0.0001f) return false;
+            direcaoDeCombate = direcao.normalized;
+            if (Mathf.Abs(direcaoDeCombate.x) > 0.05f)
+                olhando = direcaoDeCombate.x < 0f ? -1 : 1;
+            return true;
+        }
+
+        public void DefinirAlvoContextualDeCombate(Transform alvo)
+        {
+            alvoContextualDeCombate = alvo;
+        }
+
+        /// <summary>
+        /// Converte a entrada mundial X/Z para direita/frente do corpo em combate.
+        /// Sardael continua encarando o alvo enquanto o Blend Tree escolhe a esquiva.
+        /// Sem direcao, o comportamento tradicional continua sendo recuar.
+        /// </summary>
+        Vector2 CalcularDirecaoDaEsquiva(Vector2 eixo)
+        {
+            Vector3 intencao = new Vector3(eixo.x, 0f, eixo.y);
+            if (intencao.sqrMagnitude < 0.04f) return Vector2.down;
+
+            Vector3 frente = direcaoDeCombate;
+            frente.y = 0f;
+            if (frente.sqrMagnitude < 0.0001f) frente = transform.forward;
+            frente.Normalize();
+
+            Vector3 direita = Vector3.Cross(Vector3.up, frente).normalized;
+            intencao.Normalize();
+            return new Vector2(
+                Vector3.Dot(intencao, direita),
+                Vector3.Dot(intencao, frente)).normalized;
+        }
+
+        public void EntrarEmCombate()
+        {
+            modoAtual = ModoMovimentoHeroi.Combate;
+            velocidadePlanar = Vector3.zero;
+            velX = 0f;
+            if (transform.forward.sqrMagnitude > 0.01f)
+                DefinirDirecaoDeCombate(transform.forward);
+        }
+
+        public void IniciarRetornoALinha(float zOriginal)
+        {
+            modoAtual = ModoMovimentoHeroi.RetornoALinha;
+            zDeRetorno = zOriginal;
+            velocidadePlanar = Vector3.zero;
+            velX = 0f;
+            CancelarDeslocamentoDeCombate();
+        }
+
+        public void EntrarEmExploracao(float zOriginal)
+        {
+            zDaLinha = zOriginal;
+            zDeRetorno = zOriginal;
+            modoAtual = ModoMovimentoHeroi.Exploracao;
+            alvoContextualDeCombate = null;
+            velocidadePlanar = Vector3.zero;
+            var p = transform.position;
+            p.z = zOriginal;
+            transform.position = p;
+        }
+
+        void AtualizarConhecimentoDosParametros()
+        {
+            if (anim == null || anim.runtimeAnimatorController == controladorComParametrosConhecidos)
+                return;
+            controladorComParametrosConhecidos = anim.runtimeAnimatorController;
+            temVelocidade = false;
+            temNoChao = false;
+            temEsquivaHorizontal = false;
+            temEsquivaVertical = false;
+            foreach (var parametro in anim.parameters)
+            {
+                if (parametro.name == P_VELOCIDADE) temVelocidade = true;
+                else if (parametro.name == P_NO_CHAO) temNoChao = true;
+                else if (parametro.name == P_ESQUIVA_HORIZONTAL) temEsquivaHorizontal = true;
+                else if (parametro.name == P_ESQUIVA_VERTICAL) temEsquivaVertical = true;
+            }
+        }
+
+        void LerEntrada(out Vector2 eixo, out bool correndo, out bool pulou,
                         out bool esquivou, out bool rolou, out bool arrancou)
         {
             if (Travado)
             {
-                eixo = 0f; correndo = false; pulou = false;
+                eixo = Vector2.zero; correndo = false; pulou = false;
                 esquivou = false; rolou = false; arrancou = false;
-                eixoDeFora = 0f; correrDeFora = false;
+                eixoDeFora = Vector2.zero; correrDeFora = false;
                 puloDeFora = esquivaDeFora = rolarDeFora = arrancoDeFora = false;
 
                 // PARA NA HORA, nao por desaceleracao. Zerar so' a entrada deixa a velocidade
@@ -347,37 +539,26 @@ namespace Sardael
                 // O deslocamento do clipe tambem morre aqui: habilidade em curso continuaria
                 // empurrando o corpo mesmo com a entrada zerada.
                 velX = 0f;
+                velocidadePlanar = Vector3.zero;
                 deslocamentoDaAnimacao = Vector3.zero;
-                deslocamentoDeCombateX = 0f;
+                deslocamentoDeCombate = Vector3.zero;
                 return;
             }
 
             eixo = eixoDeFora; correndo = correrDeFora;
+            eixoDeFora = Vector2.zero;
             pulou    = puloDeFora;    puloDeFora = false;
             esquivou = esquivaDeFora; esquivaDeFora = false;
             rolou    = rolarDeFora;   rolarDeFora = false;
             arrancou = arrancoDeFora; arrancoDeFora = false;
-#if ENABLE_INPUT_SYSTEM
-            if (SoInjecao) return;
-            var t = Keyboard.current;
-            if (t == null) return;
-            if (t.dKey.isPressed || t.rightArrowKey.isPressed) eixo += 1f;
-            if (t.aKey.isPressed || t.leftArrowKey.isPressed) eixo -= 1f;
-            correndo |= t.leftShiftKey.isPressed;
-            pulou    |= t.spaceKey.wasPressedThisFrame;
-            esquivou |= t.leftCtrlKey.wasPressedThisFrame;
-            rolou    |= t.cKey.wasPressedThisFrame;
-            arrancou |= t.leftAltKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) eixo += 1f;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) eixo -= 1f;
-            correndo |= Input.GetKey(KeyCode.LeftShift);
-            pulou    |= Input.GetKeyDown(KeyCode.Space);
-            esquivou |= Input.GetKeyDown(KeyCode.LeftControl);
-            rolou    |= Input.GetKeyDown(KeyCode.C);
-            arrancou |= Input.GetKeyDown(KeyCode.LeftAlt);
-#endif
-            eixo = Mathf.Clamp(eixo, -1f, 1f);
+            if (!SoInjecao && entrada != null)
+            {
+                eixo += entrada.Movimento;
+                correndo |= entrada.Correndo;
+                pulou |= entrada.ConsumirPulo();
+                esquivou |= entrada.ConsumirEsquiva();
+            }
+            eixo = Vector2.ClampMagnitude(eixo, 1f);
         }
 
         void OnGUI()
@@ -391,9 +572,10 @@ namespace Sardael
                 "CTRL  esquiva      C  rolar      ALT  arranco\n" +
                 "E  falar / interagir\n" +
                 "\n" +
-                "estado: " + EstadoDaAnimacao + (EmAcao ? "   [EM ACAO]" : "") + "\n" +
-                string.Format("x = {0:F2}    velocidade = {1:F2} m/s    no chao: {2}",
-                              transform.position.x, VelocidadeAtual, NoChao),
+                "modo: " + modoAtual + "   estado: " + EstadoDaAnimacao +
+                (EmAcao ? "   [EM ACAO]" : "") + "\n" +
+                string.Format("x/z = {0:F2}/{1:F2}    velocidade = {2:F2} m/s    no chao: {3}",
+                              transform.position.x, transform.position.z, VelocidadeAtual, NoChao),
                 e);
         }
     }

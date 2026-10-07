@@ -5,13 +5,21 @@ using UnityEngine;
 
 namespace Sardael
 {
+    public enum PosturaDeExecucao
+    {
+        NoChao,
+        EmPe
+    }
+
     [Serializable]
     public sealed class VarianteDeExecucao
     {
         [SerializeField] string nome;
         [SerializeField] RuntimeAnimatorController controladorDoExecutor;
         [SerializeField] RuntimeAnimatorController controladorDaVitima;
+        [SerializeField] PosturaDeExecucao postura = PosturaDeExecucao.NoChao;
         [SerializeField, Min(0.5f)] float distanciaDeAlinhamento = 1.756f;
+        [SerializeField] float desvioLateralDeAlinhamento;
         [SerializeField, Min(0.05f)] float instanteDoImpacto = 0.8f;
         [SerializeField, Min(0.2f)] float duracaoTotal = 1.8f;
         [SerializeField] bool decapitar;
@@ -19,7 +27,10 @@ namespace Sardael
         public string Nome => nome;
         public RuntimeAnimatorController ControladorDoExecutor => controladorDoExecutor;
         public RuntimeAnimatorController ControladorDaVitima => controladorDaVitima;
+        public PosturaDeExecucao Postura => postura;
+        public bool ExigeDerrubada => postura == PosturaDeExecucao.NoChao;
         public float DistanciaDeAlinhamento => distanciaDeAlinhamento;
+        public float DesvioLateralDeAlinhamento => desvioLateralDeAlinhamento;
         public float InstanteDoImpacto => instanteDoImpacto;
         public float DuracaoTotal => duracaoTotal;
         public bool Decapitar => decapitar;
@@ -29,7 +40,9 @@ namespace Sardael
             string novoNome,
             RuntimeAnimatorController novoControladorDoExecutor,
             RuntimeAnimatorController novoControladorDaVitima,
+            PosturaDeExecucao novaPostura,
             float novaDistanciaDeAlinhamento,
+            float novoDesvioLateralDeAlinhamento,
             float novoInstanteDoImpacto,
             float novaDuracaoTotal,
             bool deveDecapitar = false)
@@ -37,7 +50,9 @@ namespace Sardael
             nome = novoNome;
             controladorDoExecutor = novoControladorDoExecutor;
             controladorDaVitima = novoControladorDaVitima;
+            postura = novaPostura;
             distanciaDeAlinhamento = Mathf.Max(0.5f, novaDistanciaDeAlinhamento);
+            desvioLateralDeAlinhamento = novoDesvioLateralDeAlinhamento;
             instanteDoImpacto = Mathf.Max(0.05f, novoInstanteDoImpacto);
             duracaoTotal = Mathf.Max(instanteDoImpacto, novaDuracaoTotal);
             decapitar = deveDecapitar;
@@ -60,9 +75,12 @@ namespace Sardael
         [SerializeField, Min(0.2f)] float duracaoDaDerrubada = 1.62f;
         [SerializeField, Min(0.1f)] float toleranciaDoComandoDeInteracao = 0.75f;
         [SerializeField, Min(1f)] float raioDoEspecial = 5.5f;
+        [SerializeField, Min(0f)] float invulnerabilidadeAposExecucao = 1.25f;
 
         readonly List<AlvoDeCombate> alvos = new List<AlvoDeCombate>();
-        readonly List<int> indicesValidos = new List<int>(4);
+        // Baralho de variantes: todas aparecem uma vez antes de o conjunto ser embaralhado de novo.
+        // Assim a aleatoriedade nao fica parecendo "sempre a mesma" por puro azar.
+        readonly List<int> sacoDeVariantes = new List<int>(8);
         Coroutine rotina;
         int indiceDaUltimaVariante = -1;
         float interacaoPendenteAte = -1f;
@@ -96,8 +114,14 @@ namespace Sardael
             animatorHeroi = novoAnimatorHeroi;
             controladorDaDerrubadaDoExecutor = novoControladorDaDerrubadaDoExecutor;
             controladorDaDerrubadaDaVitima = novoControladorDaDerrubadaDaVitima;
+            ConfigurarVariantes(novasVariantes);
+        }
+
+        public void ConfigurarVariantes(VarianteDeExecucao[] novasVariantes)
+        {
             variantes = novasVariantes ?? Array.Empty<VarianteDeExecucao>();
             indiceDaUltimaVariante = -1;
+            sacoDeVariantes.Clear();
         }
 
         void Update()
@@ -123,10 +147,9 @@ namespace Sardael
                 return false;
             registro.PreencherTodos(transform.position, alvos);
 
-            float eixo = entrada == null ? 0f : entrada.MoveX;
-            int ladoPreferido = Mathf.Abs(eixo) > 0.15f ? (eixo < 0f ? -1 : 1) : 0;
-            AlvoDeCombate escolhido = EncontrarAtordoado(ladoPreferido);
-            if (escolhido == null && ladoPreferido != 0) escolhido = EncontrarAtordoado(0);
+            Vector2 eixo = entrada == null ? Vector2.zero : entrada.Movimento;
+            AlvoDeCombate escolhido = EncontrarAtordoado(
+                new Vector3(eixo.x, 0f, eixo.y));
 
             if (escolhido == null || !escolhido.TentarReservar(this)) return false;
             rotina = StartCoroutine(RotinaDeExecucao(escolhido, SortearVariante()));
@@ -137,25 +160,31 @@ namespace Sardael
         {
             if (registro == null) return false;
             registro.PreencherTodos(transform.position, alvos);
-            return EncontrarAtordoado(0) != null;
+            return EncontrarAtordoado(Vector3.zero) != null;
         }
 
-        AlvoDeCombate EncontrarAtordoado(int ladoPreferido)
+        AlvoDeCombate EncontrarAtordoado(Vector3 direcaoPreferida)
         {
             AlvoDeCombate escolhido = null;
-            float menorDistancia = float.MaxValue;
+            float melhorPontuacao = float.NegativeInfinity;
+            direcaoPreferida.y = 0f;
+            bool temDirecao = direcaoPreferida.sqrMagnitude > 0.0225f;
+            if (temDirecao) direcaoPreferida.Normalize();
             for (int i = 0; i < alvos.Count; i++)
             {
                 var candidato = alvos[i];
                 if (candidato == null || !candidato.Valido || !candidato.Atordoado || candidato.Reservado)
                     continue;
-                float delta = candidato.transform.position.x - transform.position.x;
-                float distancia = Mathf.Abs(delta);
+                Vector3 delta = candidato.transform.position - transform.position;
+                delta.y = 0f;
+                float distancia = delta.magnitude;
                 if (distancia > alcanceDeReserva) continue;
-                if (ladoPreferido != 0 && (delta < 0f ? -1 : 1) != ladoPreferido) continue;
-                if (distancia >= menorDistancia) continue;
+                float pontuacao = -distancia;
+                if (temDirecao && distancia > 0.001f)
+                    pontuacao += Vector3.Dot(direcaoPreferida, delta / distancia) * 5f;
+                if (pontuacao <= melhorPontuacao) continue;
                 escolhido = candidato;
-                menorDistancia = distancia;
+                melhorPontuacao = pontuacao;
             }
             return escolhido;
         }
@@ -166,11 +195,12 @@ namespace Sardael
                 movimento.EmAcao || ContarVariantesValidas() == 0)
                 return false;
 
-            int direcao = Mathf.Abs(entrada == null ? 0f : entrada.MoveX) > 0.15f
-                ? (entrada.MoveX < 0f ? -1 : 1)
-                : movimento.Olhando;
-            var alvo = registro.PrimeiroNoLado(transform.position, direcao);
-            if (alvo == null || Mathf.Abs(alvo.transform.position.x - transform.position.x) > alcanceDeReserva ||
+            Vector2 eixo = entrada == null ? Vector2.zero : entrada.Movimento;
+            Vector3 direcao = new Vector3(eixo.x, 0f, eixo.y);
+            var alvo = registro.MelhorAlvoNaDirecao(
+                transform.position, direcao, transform.forward, null, alcanceDeReserva);
+            if (alvo == null ||
+                RegistroDeCombate.DistanciaPlanar(alvo.transform.position, transform.position) > alcanceDeReserva ||
                 !alvo.TentarReservar(this))
                 return false;
 
@@ -191,7 +221,8 @@ namespace Sardael
             UltimoEspecialAcertos = 0;
 
             for (int i = 0; i < alvos.Count; i++)
-                if (Mathf.Abs(alvos[i].transform.position.x - transform.position.x) <= raioDoEspecial)
+                if (RegistroDeCombate.DistanciaPlanar(
+                    alvos[i].transform.position, transform.position) <= raioDoEspecial)
                     UltimoEspecialAcertos++;
             if (UltimoEspecialAcertos == 0 || !flow.ConsumirCheio()) return false;
 
@@ -205,7 +236,8 @@ namespace Sardael
             for (int i = 0; i < alvos.Count; i++)
             {
                 var alvo = alvos[i];
-                if (Mathf.Abs(alvo.transform.position.x - transform.position.x) > raioDoEspecial) continue;
+                if (RegistroDeCombate.DistanciaPlanar(
+                    alvo.transform.position, transform.position) > raioDoEspecial) continue;
                 alvo.ReceberColisaoEmCadeia(true);
                 alvo.Motor?.AplicarDeslocamento(empurrao, transform);
             }
@@ -229,15 +261,21 @@ namespace Sardael
             float limite = Time.time + 1.25f;
             while (alvo != null && alvo.Valido && Time.time < limite)
             {
-                float delta = alvo.transform.position.x - transform.position.x;
-                int lado = delta < 0f ? -1 : 1;
-                float xDesejado = alvo.transform.position.x - lado * variante.DistanciaDeAlinhamento;
-                float erro = xDesejado - transform.position.x;
-                if (Mathf.Abs(erro) <= 0.02f) break;
-                movimento.DefinirDirecaoDeCombate(lado);
-                float passo = Mathf.Clamp(erro,
-                    -velocidadeDeAlinhamento * Time.deltaTime,
-                    velocidadeDeAlinhamento * Time.deltaTime);
+                Vector3 direcao = alvo.transform.position - transform.position;
+                direcao.y = 0f;
+                if (direcao.sqrMagnitude <= 0.0001f) direcao = transform.forward;
+                direcao.Normalize();
+                Vector3 direita = Vector3.Cross(Vector3.up, direcao).normalized;
+                Vector3 desejada = alvo.transform.position -
+                    direcao * variante.DistanciaDeAlinhamento -
+                    direita * variante.DesvioLateralDeAlinhamento;
+                desejada.y = transform.position.y;
+                Vector3 erro = desejada - transform.position;
+                erro.y = 0f;
+                if (erro.sqrMagnitude <= 0.0004f) break;
+                movimento.DefinirDirecaoDeCombate(direcao);
+                Vector3 passo = Vector3.ClampMagnitude(
+                    erro, velocidadeDeAlinhamento * Time.deltaTime);
                 if (!movimento.AdicionarDeslocamentoDeCombate(passo)) break;
                 yield return null;
             }
@@ -248,17 +286,25 @@ namespace Sardael
                 yield break;
             }
 
-            int direcao = alvo.transform.position.x < transform.position.x ? -1 : 1;
-            movimento.DefinirDirecaoDeCombate(direcao);
+            Vector3 direcaoFinal = alvo.transform.position - transform.position;
+            direcaoFinal.y = 0f;
+            if (direcaoFinal.sqrMagnitude <= 0.0001f) direcaoFinal = transform.forward;
+            direcaoFinal.Normalize();
+            movimento.DefinirDirecaoDeCombate(direcaoFinal);
             movimento.Travar(this, true);
-            alvo.transform.rotation = Quaternion.Euler(0f, direcao > 0 ? -90f : 90f, 0f);
+            Quaternion rotacaoDoExecutor = Quaternion.LookRotation(direcaoFinal, Vector3.up);
+            transform.rotation = rotacaoDoExecutor;
+            alvo.transform.rotation = variante.Postura == PosturaDeExecucao.EmPe
+                ? rotacaoDoExecutor
+                : Quaternion.LookRotation(-direcaoFinal, Vector3.up);
 
             RuntimeAnimatorController originalHeroi = animatorHeroi == null ? null : animatorHeroi.runtimeAnimatorController;
             Animator animatorAlvo = alvo.GetComponent<Animator>();
             CharacterController controladorAlvo = alvo.GetComponent<CharacterController>();
             if (controladorAlvo != null) controladorAlvo.enabled = false;
 
-            if (controladorDaDerrubadaDoExecutor != null && controladorDaDerrubadaDaVitima != null)
+            if (variante.ExigeDerrubada &&
+                controladorDaDerrubadaDoExecutor != null && controladorDaDerrubadaDaVitima != null)
             {
                 AplicarControlador(animatorHeroi, controladorDaDerrubadaDoExecutor);
                 AplicarControlador(animatorAlvo, controladorDaDerrubadaDaVitima);
@@ -299,7 +345,7 @@ namespace Sardael
                 Mathf.Max(0f, variante.DuracaoTotal - variante.InstanteDoImpacto));
             if (animatorAlvo != null) animatorAlvo.speed = 0f;
             RestaurarHeroi(originalHeroi);
-            Encerrar(alvo, diretorEstavaAtivo);
+            Encerrar(alvo, diretorEstavaAtivo, true);
         }
 
         static void AplicarControlador(Animator animator, RuntimeAnimatorController controlador)
@@ -317,11 +363,21 @@ namespace Sardael
             AplicarControlador(animatorHeroi, controladorOriginal);
         }
 
-        void Encerrar(AlvoDeCombate alvo, bool reativarDiretor)
+        void Encerrar(AlvoDeCombate alvo, bool reativarDiretor, bool execucaoConcluida = false)
         {
             movimento?.Travar(this, false);
+            movimento?.CancelarDeslocamentoDeCombate();
             alvo?.LiberarReserva(this);
-            if (diretor != null) diretor.DefinirAtivo(reativarDiretor);
+
+            VidaDoHeroi vida = movimento == null ? null : movimento.GetComponent<VidaDoHeroi>();
+            if (execucaoConcluida && vida != null)
+                vida.ConcederInvulnerabilidade(invulnerabilidadeAposExecucao);
+
+            bool heroiPodeContinuar = vida == null || vida.Vivo;
+            bool encontroContinua = movimento != null && movimento.EmModoCombate &&
+                registro != null && registro.Quantidade > 0;
+            if (diretor != null)
+                diretor.DefinirAtivo(heroiPodeContinuar && (reativarDiretor || encontroContinua));
             rotina = null;
         }
 
@@ -337,21 +393,33 @@ namespace Sardael
         VarianteDeExecucao SortearVariante()
         {
             if (variantes == null) return null;
-            indicesValidos.Clear();
+            if (sacoDeVariantes.Count == 0) ReabastecerSacoDeVariantes();
+            if (sacoDeVariantes.Count == 0) return null;
+
+            int ultimo = sacoDeVariantes.Count - 1;
+            indiceDaUltimaVariante = sacoDeVariantes[ultimo];
+            sacoDeVariantes.RemoveAt(ultimo);
+            return variantes[indiceDaUltimaVariante];
+        }
+
+        void ReabastecerSacoDeVariantes()
+        {
+            sacoDeVariantes.Clear();
             for (int i = 0; i < variantes.Length; i++)
+                if (variantes[i] != null && variantes[i].Valida) sacoDeVariantes.Add(i);
+
+            for (int i = sacoDeVariantes.Count - 1; i > 0; i--)
             {
-                if (variantes[i] == null || !variantes[i].Valida) continue;
-                if (i != indiceDaUltimaVariante) indicesValidos.Add(i);
+                int outro = UnityEngine.Random.Range(0, i + 1);
+                (sacoDeVariantes[i], sacoDeVariantes[outro]) =
+                    (sacoDeVariantes[outro], sacoDeVariantes[i]);
             }
 
-            // Com uma unica opcao valida, repetir e' preferivel a impedir a execucao.
-            if (indicesValidos.Count == 0 && indiceDaUltimaVariante >= 0 &&
-                indiceDaUltimaVariante < variantes.Length && variantes[indiceDaUltimaVariante].Valida)
-                indicesValidos.Add(indiceDaUltimaVariante);
-            if (indicesValidos.Count == 0) return null;
-
-            indiceDaUltimaVariante = indicesValidos[UnityEngine.Random.Range(0, indicesValidos.Count)];
-            return variantes[indiceDaUltimaVariante];
+            // O proximo item e' retirado do fim. Impede repeticao tambem na emenda de dois ciclos.
+            int proximo = sacoDeVariantes.Count - 1;
+            if (proximo > 0 && sacoDeVariantes[proximo] == indiceDaUltimaVariante)
+                (sacoDeVariantes[proximo], sacoDeVariantes[0]) =
+                    (sacoDeVariantes[0], sacoDeVariantes[proximo]);
         }
 
         void OnDisable()

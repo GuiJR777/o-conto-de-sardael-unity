@@ -11,10 +11,13 @@ namespace Sardael
         [SerializeField] MovimentoDoHeroi movimento;
         [SerializeField] Animator animator;
         [SerializeField] SistemaDeFlow flow;
+        [SerializeField] DiretorDeCombate diretor;
         [SerializeField, Min(0.1f)] float janelaDeContraAtaque = 0.9f;
         [SerializeField, Min(0f)] float danoDoContraAtaque = 4f;
         [SerializeField, Min(0f)] float poiseDoContraAtaque = 100f;
         [SerializeField, Min(0f)] float flowDoAparo = 8f;
+        [SerializeField, Min(0.5f)] float alcanceDoParry = 3f;
+        [SerializeField, Range(30f, 360f)] float anguloDoParry = 220f;
 
         AlvoDeCombate alvoDoContraAtaque;
         float contraAtaqueAte;
@@ -36,13 +39,15 @@ namespace Sardael
             CombateDoHeroi novoCombate,
             MovimentoDoHeroi novoMovimento,
             Animator novoAnimator,
-            SistemaDeFlow novoFlow)
+            SistemaDeFlow novoFlow,
+            DiretorDeCombate novoDiretor = null)
         {
             entrada = novaEntrada;
             combate = novoCombate;
             movimento = novoMovimento;
             animator = novoAnimator;
             flow = novoFlow;
+            diretor = novoDiretor;
         }
 
         void Awake()
@@ -51,19 +56,24 @@ namespace Sardael
             if (combate == null) combate = GetComponent<CombateDoHeroi>();
             if (movimento == null) movimento = GetComponent<MovimentoDoHeroi>();
             if (animator == null) animator = GetComponent<Animator>();
+            if (diretor == null) diretor = FindAnyObjectByType<DiretorDeCombate>();
         }
 
         void Update()
         {
             bool querBloquear = BloqueandoAgora;
-            if (querBloquear && !bloqueioAplicado)
+            if (querBloquear)
             {
-                float direcao = entrada == null ? 0f : entrada.MoveX;
-                if (Mathf.Abs(direcao) > 0.2f)
+                var ameaca = diretor == null
+                    ? null
+                    : diretor.AmeacaMaisUrgente(
+                        transform.position, transform.forward, alcanceDoParry, anguloDoParry);
+                if (ameaca != null)
                 {
-                    int lado = direcao > 0f ? 1 : -1;
-                    if (combate == null || !combate.CancelarParaDefesa(lado))
-                        movimento?.DefinirDirecaoDeCombate(lado);
+                    Vector3 direcao = ameaca.transform.position - transform.position;
+                    direcao.y = 0f;
+                    if (bloqueioAplicado || combate == null || !combate.CancelarParaDefesa(direcao))
+                        movimento?.DefinirDirecaoDeCombate(direcao);
                 }
             }
             if (querBloquear != bloqueioAplicado)
@@ -85,9 +95,14 @@ namespace Sardael
             if (!BloqueandoAgora || atacante == null || atacante.Alvo == null || movimento == null)
                 return false;
 
-            float delta = atacante.transform.position.x - transform.position.x;
-            int lado = delta >= 0f ? 1 : -1;
-            if (lado != movimento.Olhando) return false;
+            Vector3 direcao = atacante.transform.position - transform.position;
+            direcao.y = 0f;
+            float distancia = direcao.magnitude;
+            if (distancia > alcanceDoParry || distancia <= 0.001f) return false;
+            float angulo = Vector3.Angle(transform.forward, direcao / distancia);
+            if (angulo > anguloDoParry * 0.5f) return false;
+
+            movimento.DefinirDirecaoDeCombate(direcao);
 
             alvoDoContraAtaque = atacante.Alvo;
             contraAtaqueAte = Time.time + janelaDeContraAtaque;
@@ -122,7 +137,9 @@ namespace Sardael
             alvoDoContraAtaque = null;
             if (alvo == null || !alvo.Valido) return;
             ContraAtaques++;
-            movimento?.DefinirDirecaoDeCombate(alvo.transform.position.x >= transform.position.x ? 1 : -1);
+            Vector3 direcao = alvo.transform.position - transform.position;
+            direcao.y = 0f;
+            movimento?.DefinirDirecaoDeCombate(direcao);
             if (animator != null) animator.SetTrigger(ContraAtacar);
             alvo.ReceberContraAtaque(danoDoContraAtaque, poiseDoContraAtaque, transform);
             StartCoroutine(TravarContraAtaque(0.55f));

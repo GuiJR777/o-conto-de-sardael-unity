@@ -201,6 +201,8 @@ namespace Sardael
             Habilidade(sm, rolar,       MovimentoDoHeroi.P_ROLAR, null, false, locomocao);
             Habilidade(sm, arranco,     MovimentoDoHeroi.P_ARRANCAR, null, false, locomocao);
 
+            SardaelEditor.MontarEsquivaDirecional.Configurar(ctrl);
+
             EditorUtility.SetDirty(ctrl);
             AssetDatabase.SaveAssets();
 

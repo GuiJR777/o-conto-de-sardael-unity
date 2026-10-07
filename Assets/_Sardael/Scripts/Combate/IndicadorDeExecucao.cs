@@ -4,6 +4,8 @@ namespace Sardael
 {
     public sealed class IndicadorDeExecucao : MonoBehaviour
     {
+        const string Caveira = "\u2620";
+
         [SerializeField] AlvoDeCombate alvo;
         [SerializeField] Transform jogador;
         [SerializeField, Min(0.5f)] float alcance = 4.5f;
@@ -34,7 +36,8 @@ namespace Sardael
             }
 
             bool mostrar = alvo != null && alvo.Valido && alvo.Atordoado && !alvo.Reservado &&
-                jogador != null && Mathf.Abs(jogador.position.x - transform.position.x) <= alcance;
+                jogador != null && RegistroDeCombate.DistanciaPlanar(
+                    jogador.position, transform.position) <= alcance;
             if (texto.gameObject.activeSelf != mostrar) texto.gameObject.SetActive(mostrar);
             if (!mostrar) return;
 
@@ -46,21 +49,31 @@ namespace Sardael
 
         void GarantirVisual()
         {
-            if (texto != null) return;
-            var objeto = new GameObject("IndicadorDeExecucao");
-            objeto.transform.SetParent(transform, false);
-            objeto.transform.localPosition = new Vector3(0f, 2.55f, 0f);
-            texto = objeto.AddComponent<TextMesh>();
-            texto.text = "E";
+            bool acabouDeCriar = false;
+            if (texto == null)
+            {
+                Transform existente = transform.Find("IndicadorDeExecucao");
+                if (existente != null) texto = existente.GetComponent<TextMesh>();
+            }
+            if (texto == null)
+            {
+                var objeto = new GameObject("IndicadorDeExecucao");
+                objeto.transform.SetParent(transform, false);
+                texto = objeto.AddComponent<TextMesh>();
+                acabouDeCriar = true;
+            }
+
+            texto.transform.localPosition = new Vector3(0f, 2.55f, 0f);
+            texto.text = Caveira;
             texto.anchor = TextAnchor.MiddleCenter;
             texto.alignment = TextAlignment.Center;
-            texto.fontSize = 82;
-            texto.characterSize = 0.045f;
+            texto.fontSize = 96;
+            texto.characterSize = 0.05f;
             texto.fontStyle = FontStyle.Bold;
-            texto.color = new Color(0.3f, 1f, 0.45f);
-            var renderizador = objeto.GetComponent<MeshRenderer>();
+            texto.color = new Color(1f, 0.32f, 0.24f);
+            var renderizador = texto.GetComponent<MeshRenderer>();
             if (renderizador != null) renderizador.sortingOrder = 55;
-            objeto.SetActive(false);
+            if (acabouDeCriar) texto.gameObject.SetActive(false);
         }
     }
 }

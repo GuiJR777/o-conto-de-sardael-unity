@@ -15,10 +15,10 @@ MonoBehaviour:
   id: golpe_2
   eloCombo: 2
   alcance: 1.166
-  alcanceMagnetismo: 4.75
+  alcanceMagnetismo: 8.5
   alcanceMultiAlvo: 3.5
   distanciaDesejada: 1
-  velocidadeAproximacao: 10
+  velocidadeAproximacao: 14
   dano: 20
   poise: 25
   padraoDeAlvo: 1

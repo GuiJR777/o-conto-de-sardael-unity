@@ -60,6 +60,25 @@ namespace Sardael
             Posicionar(false);
         }
 
+        public void ObterPoseDesejada(out Vector3 posicao, out Quaternion rotacao)
+        {
+            float x = alvo == null ? transform.position.x : alvo.position.x;
+            if (usarLimites) x = Mathf.Clamp(x, xMinimo, xMaximo);
+            posicao = new Vector3(x, altura, -distancia);
+            rotacao = Quaternion.Euler(inclinacao, 0f, 0f);
+        }
+
+        public void SincronizarAgora()
+        {
+            if (alvo != null)
+            {
+                xAtual = alvo.position.x;
+                xAnterior = xAtual;
+            }
+            velocidade = velocidadeMedida = aceleracaoMedida = 0f;
+            Posicionar(true);
+        }
+
         void Posicionar(bool imediato)
         {
             if (alvo == null) return;

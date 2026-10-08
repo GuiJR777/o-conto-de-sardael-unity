@@ -21,7 +21,7 @@ namespace SardaelEditor
         const string PastaControllersDeExecucao =
             "Assets/_Pacotes/Full_Mount_Attacks/Art/AnimatorControllers/Paired_FullMount_";
         const string PastaControllersDeExecucaoEmPe =
-            "Assets/_Pacotes/SpearCombatAnimationV2/Controller/RM/A_SpearCombatAnimationV2_";
+            "Assets/_Pacotes/SpearCombatAnimationV2/Controller/IP/A_SpearCombatAnimationV2_";
         const string DerrubadaEscolhida = "Takedown_DoubleLeg_Start";
         const string FxSangue =
             "Assets/_Pacotes/Synty/PolygonGeneric/Prefabs/FX/FX_Blood_Splatter_01.prefab";
@@ -63,13 +63,14 @@ namespace SardaelEditor
         static readonly bool[] DecapitacoesNoChao = { true, false };
         static readonly string[] ExecucoesEmPe =
         {
-            "Attack7_Stage3_Complete",
-            "Attack8_Stage4_Complete"
+            "Attack6_Stage3_Complete",
+            "Attack11"
         };
-        // Os pares RM da lanca foram animados a 1,756 m e 0,041 m de lado, com os dois
-        // personagens na mesma rotacao. A duracao termina pouco antes do loop do controller.
-        static readonly float[] ImpactosEmPe = { 1.30f, 1.18f };
-        static readonly float[] DuracoesEmPe = { 2.25f, 2.05f };
+        // Os pares da lanca foram animados a 1,756 m e 0,041 m de lado, com os dois
+        // personagens na mesma rotacao. Estas versoes IP ficam abaixo de 40 graus de giro
+        // da raiz e preservam a coreografia sem fazer o executor contornar o alvo.
+        static readonly float[] ImpactosEmPe = { 1.00f, 1.50f };
+        static readonly float[] DuracoesEmPe = { 1.60f, 2.40f };
         static readonly PadraoDeAlvo[] Padroes =
         {
             PadraoDeAlvo.Single,
@@ -162,7 +163,7 @@ namespace SardaelEditor
             combate.Configurar(movimento, entrada, registro, resolvedor, animatorHeroi, definicoes);
             var defesa = heroi.GetComponent<DefesaDoHeroi>();
             if (defesa == null) defesa = heroi.AddComponent<DefesaDoHeroi>();
-            defesa.Configurar(entrada, combate, movimento, animatorHeroi, flow, diretor);
+            defesa.Configurar(entrada, combate, movimento, animatorHeroi, flow, diretor, 0.6f);
             var vida = heroi.GetComponent<VidaDoHeroi>();
             if (vida == null) vida = heroi.AddComponent<VidaDoHeroi>();
             vida.Configurar(movimento, animatorHeroi, flow, diretor, defesa);
@@ -184,6 +185,7 @@ namespace SardaelEditor
             var execucao = heroi.AddComponent<SistemaDeExecucao>();
             execucao.Configurar(
                 movimento, entrada, registro, flow, diretor, animatorHeroi,
+                cameraCombate,
                 controllerDerrubadaHeroi, controllerDerrubadaVitima,
                 variantesDeExecucao);
             modo.Configurar(movimento, registro, diretor, cameraCombate);
@@ -326,7 +328,7 @@ namespace SardaelEditor
         {
             return AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
                 PastaControllersDeExecucaoEmPe + nome +
-                (reacao ? "_React_RM.controller" : "_RM.controller"));
+                (reacao ? "_React_IP.controller" : "_IP.controller"));
         }
 
         static AnimationClip[] CarregarAnimacoesDeMorte()
@@ -445,25 +447,31 @@ namespace SardaelEditor
             // O Input System proibe alterar mapas nesse estado, mesmo ja estando no Edit Mode.
             input.Disable();
             var mapa = input.FindActionMap("Player", true);
-            if (mapa.FindAction("Execution", false) == null)
-            {
-                var acao = mapa.AddAction("Execution", InputActionType.Button);
-                acao.AddBinding("<Keyboard>/q", groups: "Keyboard&Mouse");
-                acao.AddBinding("<Gamepad>/rightShoulder", groups: "Gamepad");
-            }
+            var interagir = mapa.FindAction("Interact", true);
+            SubstituirBindings(interagir,
+                ("<Keyboard>/e", "Keyboard&Mouse"),
+                ("<Gamepad>/buttonNorth", "Gamepad"));
+
+            var executar = mapa.FindAction("Execution", false) ??
+                mapa.AddAction("Execution", InputActionType.Button);
+            SubstituirBindings(executar);
+
             if (mapa.FindAction("FlowSpecial", false) == null)
             {
                 var acao = mapa.AddAction("FlowSpecial", InputActionType.Button);
                 acao.AddBinding("<Keyboard>/r", groups: "Keyboard&Mouse");
                 acao.AddBinding("<Gamepad>/rightTrigger", groups: "Gamepad");
             }
-            if (mapa.FindAction("Block", false) == null)
-            {
-                var acao = mapa.AddAction("Block", InputActionType.Button);
-                acao.AddBinding("<Keyboard>/f", groups: "Keyboard&Mouse");
-                acao.AddBinding("<Mouse>/rightButton", groups: "Keyboard&Mouse");
-                acao.AddBinding("<Gamepad>/leftShoulder", groups: "Gamepad");
-            }
+            var bloquear = mapa.FindAction("Block", false) ??
+                mapa.AddAction("Block", InputActionType.Button);
+            SubstituirBindings(bloquear,
+                ("<Mouse>/rightButton", "Keyboard&Mouse"),
+                ("<Gamepad>/rightShoulder", "Gamepad"));
+
+            var correr = mapa.FindAction("Sprint", true);
+            SubstituirBindings(correr,
+                ("<Keyboard>/leftShift", "Keyboard&Mouse"),
+                ("<Gamepad>/leftStickPress", "Gamepad"));
             if (mapa.FindAction("Dodge", false) == null)
             {
                 var acao = mapa.AddAction("Dodge", InputActionType.Button);
@@ -473,6 +481,16 @@ namespace SardaelEditor
             File.WriteAllText(InputActions, input.ToJson());
             AssetDatabase.ImportAsset(InputActions, ImportAssetOptions.ForceUpdate);
             return AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActions);
+        }
+
+        static void SubstituirBindings(
+            InputAction acao,
+            params (string caminho, string grupo)[] bindings)
+        {
+            for (int i = acao.bindings.Count - 1; i >= 0; i--)
+                acao.ChangeBinding(i).Erase();
+            for (int i = 0; i < bindings.Length; i++)
+                acao.AddBinding(bindings[i].caminho, groups: bindings[i].grupo);
         }
 
         static void GarantirAnimacoesCombateReal(

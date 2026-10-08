@@ -13,6 +13,7 @@ namespace Sardael
         [SerializeField] EntradaDeCombate entrada;
         [SerializeField] RegistroDeCombate registro;
         [SerializeField] ResolvedorDeImpacto resolvedor;
+        [SerializeField] SistemaDeExecucao execucao;
         [SerializeField] Animator animator;
         [SerializeField] DefinicaoDeAtaque[] ataques = new DefinicaoDeAtaque[4];
         [SerializeField, Range(0f, 1f)] float zonaMortaDaDirecao = 0.2f;
@@ -62,6 +63,7 @@ namespace Sardael
         {
             if (movimento == null) movimento = GetComponent<MovimentoDoHeroi>();
             if (entrada == null) entrada = GetComponent<EntradaDeCombate>();
+            if (execucao == null) execucao = GetComponent<SistemaDeExecucao>();
             if (animator == null) animator = GetComponent<Animator>();
         }
 
@@ -76,7 +78,12 @@ namespace Sardael
 
         void SolicitarAtaque()
         {
-            if (animator == null || movimento == null || movimento.Travado) return;
+            if (animator == null || movimento == null || movimento.Travado ||
+                movimento.EmEsquiva || (execucao != null && execucao.EmExecucao))
+            {
+                entrada?.CancelarAtaquesPendentes();
+                return;
+            }
 
             int eloNoAnimator = EloDoEstadoAtual();
             int proximoElo = eloNoAnimator <= 0 ? 1 : eloNoAnimator + 1;
@@ -88,7 +95,7 @@ namespace Sardael
 
             eloPendente = proximoElo;
             ataquePendente = Definicao(proximoElo);
-            alvoPendente = EscolherAlvo(direcaoDeEntrada, alvoAtual);
+            alvoPendente = EscolherAlvoDirecional(direcaoDeEntrada, alvoAtual);
 
             if (alvoPendente != null)
             {
@@ -127,7 +134,7 @@ namespace Sardael
             else
             {
                 Vector2 movimentoLido = entrada == null ? Vector2.zero : entrada.Movimento;
-                alvoAtual = EscolherAlvo(
+                alvoAtual = EscolherAlvoDirecional(
                     new Vector3(movimentoLido.x, 0f, movimentoLido.y), alvoAtual);
             }
 
@@ -161,7 +168,24 @@ namespace Sardael
         public bool CancelarParaDefesa(Vector3 direcao)
         {
             direcao.y = 0f;
-            if (!EmAtaque || direcao.sqrMagnitude <= 0.0001f || movimento == null) return false;
+            if (direcao.sqrMagnitude <= 0.0001f || movimento == null ||
+                !CancelarParaAcaoPrioritaria())
+                return false;
+
+            movimento.DefinirDirecaoDeCombate(direcao);
+            if (animator != null) animator.CrossFade("Bloqueio", 0.03f, 0, 0f);
+            CancelamentosDefensivos++;
+            return true;
+        }
+
+        /// <summary>
+        /// Interrompe somente um ataque do heroi. Esquiva, bloqueio e execucao usam este
+        /// caminho antes de entrar no proprio estado; outras acoes continuam sem poder se
+        /// cancelar entre si.
+        /// </summary>
+        public bool CancelarParaAcaoPrioritaria()
+        {
+            if (!EmAtaque) return false;
 
             eloAtual = 0;
             eloPendente = 0;
@@ -174,13 +198,7 @@ namespace Sardael
             lungePercorrido = 0f;
             entrada?.CancelarAtaquesPendentes();
             movimento.CancelarDeslocamentoDeCombate();
-            movimento.DefinirDirecaoDeCombate(direcao);
-            if (animator != null)
-            {
-                animator.ResetTrigger(P_ATACAR);
-                animator.CrossFade("Bloqueio", 0.03f, 0, 0f);
-            }
-            CancelamentosDefensivos++;
+            if (animator != null) animator.ResetTrigger(P_ATACAR);
             return true;
         }
 
@@ -232,7 +250,9 @@ namespace Sardael
             movimento.DefinirAlvoContextualDeCombate(alvo.transform);
         }
 
-        AlvoDeCombate EscolherAlvo(Vector3 direcaoDeEntrada, AlvoDeCombate anterior)
+        public AlvoDeCombate EscolherAlvoDirecional(
+            Vector3 direcaoDeEntrada,
+            AlvoDeCombate anterior = null)
         {
             if (registro == null) return null;
             Vector3 frente = movimento != null && movimento.EmModoCombate
@@ -258,6 +278,9 @@ namespace Sardael
             {
                 var proximo = animator.GetNextAnimatorStateInfo(0);
                 for (int i = 1; i <= ataques.Length; i++) if (proximo.IsName("Golpe" + i)) return i;
+                // A transicao ja esta saindo do golpe para uma acao prioritaria ou locomocao.
+                // Nao mantenha o estado anterior contado como ataque ativo.
+                return 0;
             }
             var atual = animator.GetCurrentAnimatorStateInfo(0);
             for (int i = 1; i <= ataques.Length; i++) if (atual.IsName("Golpe" + i)) return i;

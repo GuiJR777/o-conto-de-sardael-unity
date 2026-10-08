@@ -105,6 +105,7 @@ namespace Sardael
             if (alvo == null) alvo = GetComponent<AlvoDeCombate>();
             if (reacao == null) reacao = GetComponent<ReacaoDeCombate>();
             if (animator == null) animator = GetComponent<Animator>();
+            if (animator != null) animator.speed = MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES;
             if (aviso == null)
             {
                 aviso = GetComponent<AvisoDeAtaqueInimigo>();
@@ -477,7 +478,8 @@ namespace Sardael
             aviso?.Ocultar();
             if (!possuiTokenDeAtaque || atordoado || alvo == null || !alvo.Valido) return;
             ataqueEmAndamento = true;
-            fimDoAtaque = Time.time + 1.8f;
+            fimDoAtaque = Time.time +
+                1.8f / MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES;
             AtaquesIniciados++;
             if (animator != null) animator.SetTrigger(Atacar);
         }

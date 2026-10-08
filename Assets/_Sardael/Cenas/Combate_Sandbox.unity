@@ -1489,7 +1489,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 371084868}
-  - component: {fileID: 371084867}
   - component: {fileID: 371084866}
   - component: {fileID: 371084865}
   m_Layer: 0
@@ -1569,14 +1568,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &371084867
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 371084864}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &371084868
 Transform:
   m_ObjectHideFlags: 0
@@ -1601,7 +1592,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 464082785}
-  - component: {fileID: 464082784}
   - component: {fileID: 464082783}
   - component: {fileID: 464082782}
   m_Layer: 0
@@ -1681,14 +1671,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &464082784
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 464082781}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &464082785
 Transform:
   m_ObjectHideFlags: 0
@@ -2337,6 +2319,9 @@ MonoBehaviour:
   resposta: 5.5
   campoDeVisao: 56
   raioDeEnquadramento: 8
+  multiplicadorDoAfastamentoNaExecucao: 0.82
+  campoDeVisaoDaExecucao: 48
+  respostaDoZoomDaExecucao: 7
 --- !u!114 &1038539903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3913,7 +3898,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1562319666}
-  - component: {fileID: 1562319665}
   - component: {fileID: 1562319664}
   - component: {fileID: 1562319663}
   m_Layer: 0
@@ -3993,14 +3977,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1562319665
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1562319662}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1562319666
 Transform:
   m_ObjectHideFlags: 0
@@ -4025,7 +4001,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1616966533}
-  - component: {fileID: 1616966532}
   - component: {fileID: 1616966531}
   - component: {fileID: 1616966530}
   m_Layer: 0
@@ -4105,14 +4080,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1616966532
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1616966529}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1616966533
 Transform:
   m_ObjectHideFlags: 0
@@ -5010,10 +4977,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Sardael.SistemaDeExecucao
   movimento: {fileID: 2063076233}
   entrada: {fileID: 2063076232}
+  combate: {fileID: 0}
   registro: {fileID: 258655835}
   flow: {fileID: 258655833}
   diretor: {fileID: 258655832}
   animatorHeroi: {fileID: 2063076226}
+  cameraDeCombate: {fileID: 1038539902}
   controladorDaDerrubadaDoExecutor: {fileID: 9100000, guid: b9e7e3d1fe8409a4f89e7f95442386a4, type: 2}
   controladorDaDerrubadaDaVitima: {fileID: 9100000, guid: 9fcb1a46ddd511647a9f849d76e89c7f, type: 2}
   variantes:
@@ -5035,23 +5004,23 @@ MonoBehaviour:
     instanteDoImpacto: 0.72
     duracaoTotal: 1.42
     decapitar: 0
-  - nome: Attack7_Stage3_Complete
-    controladorDoExecutor: {fileID: 9100000, guid: e4934bcc02be7f24495507ca30c22648, type: 2}
-    controladorDaVitima: {fileID: 9100000, guid: c9dd6ca57f30c8c4db9065b2d7f7f9e6, type: 2}
+  - nome: Attack6_Stage3_Complete
+    controladorDoExecutor: {fileID: 9100000, guid: a50f8b61758f57048b382b742f9dc5e7, type: 2}
+    controladorDaVitima: {fileID: 9100000, guid: 8140fba5abdd9d9428e189ca308cc582, type: 2}
     postura: 1
     distanciaDeAlinhamento: 1.756
     desvioLateralDeAlinhamento: 0.041
-    instanteDoImpacto: 1.3
-    duracaoTotal: 2.25
+    instanteDoImpacto: 1
+    duracaoTotal: 1.6
     decapitar: 0
-  - nome: Attack8_Stage4_Complete
-    controladorDoExecutor: {fileID: 9100000, guid: 5000816be2712744aaab785591b69b83, type: 2}
-    controladorDaVitima: {fileID: 9100000, guid: 96580e530ade9a944aec73e236851e6a, type: 2}
+  - nome: Attack11
+    controladorDoExecutor: {fileID: 9100000, guid: b1d60e5c7729b5547b752144b1c89ae5, type: 2}
+    controladorDaVitima: {fileID: 9100000, guid: 555c1945cffaf5d4d8856f542a8ed06f, type: 2}
     postura: 1
     distanciaDeAlinhamento: 1.756
     desvioLateralDeAlinhamento: 0.041
-    instanteDoImpacto: 1.18
-    duracaoTotal: 2.05
+    instanteDoImpacto: 1.5
+    duracaoTotal: 2.4
     decapitar: 0
   alcanceDeReserva: 4.5
   velocidadeDeAlinhamento: 7
@@ -5095,6 +5064,7 @@ MonoBehaviour:
   animator: {fileID: 2063076226}
   flow: {fileID: 258655833}
   diretor: {fileID: 258655832}
+  janelaDeParry: 0.6
   janelaDeContraAtaque: 0.9
   danoDoContraAtaque: 4
   poiseDoContraAtaque: 100
@@ -5117,6 +5087,7 @@ MonoBehaviour:
   entrada: {fileID: 2063076232}
   registro: {fileID: 258655835}
   resolvedor: {fileID: 258655834}
+  execucao: {fileID: 0}
   animator: {fileID: 2063076226}
   ataques:
   - {fileID: 11400000, guid: b9e74b8b51a7c8c4092ed54ce35c264c, type: 2}
@@ -5176,6 +5147,7 @@ MonoBehaviour:
   aceleracaoDeCombate: 18
   velocidadeDeRetornoALinha: 6
   toleranciaDaLinha: 0.025
+  multiplicadorDistanciaDaEsquiva: 1.35
   mostrarPainel: 1
 --- !u!143 &2063076234
 CharacterController:
@@ -5220,10 +5192,10 @@ MonoBehaviour:
   - caminhoDoEstado: Base Layer/Aparo
     nomeDoEstado: Aparo
     clipeOriginal: {fileID: 8993902097722301239, guid: 10bbb19361a1582479a1985bb2474ce4, type: 3}
-    clipeSubstituto: {fileID: 3094330708855449807, guid: 52a5b8b939fb17b45ad9bffcbc1e8bf1, type: 3}
-    tocarAoContrario: 1
-    clipeReversoGerado: {fileID: 7400000, guid: 35a4771e16c64d744a3f6a4f530e2770, type: 2}
-    assinaturaDaFonteReversa: 52a5b8b939fb17b45ad9bffcbc1e8bf1:3094330708855449807:3e1675fbac9413bb1589ba3d6cb99c50
+    clipeSubstituto: {fileID: 0}
+    tocarAoContrario: 0
+    clipeReversoGerado: {fileID: 0}
+    assinaturaDaFonteReversa: 
     erroDoClipeReverso: 
   - caminhoDoEstado: Base Layer/Arranco
     nomeDoEstado: Arranco

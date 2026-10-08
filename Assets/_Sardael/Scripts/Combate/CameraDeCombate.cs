@@ -18,6 +18,10 @@ namespace Sardael
         [SerializeField, Min(0.1f)] float resposta = 5.5f;
         [SerializeField, Range(35f, 80f)] float campoDeVisao = 56f;
         [SerializeField, Min(1f)] float raioDeEnquadramento = 8f;
+        [Header("Execucao")]
+        [SerializeField, Range(0.7f, 1f)] float multiplicadorDoAfastamentoNaExecucao = 0.82f;
+        [SerializeField, Range(35f, 80f)] float campoDeVisaoDaExecucao = 48f;
+        [SerializeField, Min(0.1f)] float respostaDoZoomDaExecucao = 7f;
 
         readonly List<AlvoDeCombate> alvos = new List<AlvoDeCombate>();
         Camera cameraDoJogo;
@@ -26,9 +30,13 @@ namespace Sardael
         Quaternion inicioDaRotacao;
         float inicioDoBlend;
         float fovLateral;
+        Transform alvoDaExecucao;
+        float pesoDoZoomDaExecucao;
+        bool zoomDeExecucaoSolicitado;
 
         public bool Ativa => estado != EstadoCamera.Inativa;
         public bool SaidaConcluida => estado == EstadoCamera.Inativa;
+        public bool EmZoomDeExecucao => zoomDeExecucaoSolicitado || pesoDoZoomDaExecucao > 0.01f;
 
         public void Configurar(
             Transform novoJogador,
@@ -57,8 +65,22 @@ namespace Sardael
             inicioDaRotacao = transform.rotation;
             inicioDoBlend = Time.unscaledTime;
             estado = EstadoCamera.Entrando;
+            alvoDaExecucao = null;
+            pesoDoZoomDaExecucao = 0f;
+            zoomDeExecucaoSolicitado = false;
             if (cameraLateral != null) cameraLateral.enabled = false;
             enabled = true;
+        }
+
+        public void IniciarZoomDeExecucao(Transform alvo)
+        {
+            alvoDaExecucao = alvo;
+            zoomDeExecucaoSolicitado = alvo != null;
+        }
+
+        public void EncerrarZoomDeExecucao()
+        {
+            zoomDeExecucaoSolicitado = false;
         }
 
         public void IniciarSaida()
@@ -72,6 +94,9 @@ namespace Sardael
 
         public void ForcarLateral()
         {
+            alvoDaExecucao = null;
+            pesoDoZoomDaExecucao = 0f;
+            zoomDeExecucaoSolicitado = false;
             estado = EstadoCamera.Inativa;
             if (cameraLateral != null)
             {
@@ -84,6 +109,7 @@ namespace Sardael
         void LateUpdate()
         {
             if (estado == EstadoCamera.Inativa || jogador == null) return;
+            AtualizarZoomDeExecucao();
 
             Vector3 destino;
             Quaternion rotacao;
@@ -96,7 +122,8 @@ namespace Sardael
             else
             {
                 CalcularPoseDeCombate(out destino, out rotacao);
-                fovDestino = campoDeVisao;
+                fovDestino = Mathf.Lerp(
+                    campoDeVisao, campoDeVisaoDaExecucao, pesoDoZoomDaExecucao);
             }
 
             if (estado == EstadoCamera.Entrando || estado == EstadoCamera.Saindo)
@@ -162,9 +189,29 @@ namespace Sardael
                 }
             }
 
+            if (alvoDaExecucao != null && pesoDoZoomDaExecucao > 0f)
+            {
+                Vector3 focoDaExecucao = Vector3.Lerp(
+                    jogador.position, alvoDaExecucao.position, 0.55f);
+                foco = Vector3.Lerp(foco, focoDaExecucao, pesoDoZoomDaExecucao);
+            }
+
             foco.y = jogador.position.y + 1.1f;
-            posicao = foco + afastamento;
+            float escalaDoAfastamento = Mathf.Lerp(
+                1f, multiplicadorDoAfastamentoNaExecucao, pesoDoZoomDaExecucao);
+            posicao = foco + afastamento * escalaDoAfastamento;
             rotacao = Quaternion.LookRotation(foco - posicao, Vector3.up);
+        }
+
+        void AtualizarZoomDeExecucao()
+        {
+            float destino = zoomDeExecucaoSolicitado && alvoDaExecucao != null ? 1f : 0f;
+            float peso = 1f - Mathf.Exp(-respostaDoZoomDaExecucao * Time.unscaledDeltaTime);
+            pesoDoZoomDaExecucao = Mathf.Lerp(pesoDoZoomDaExecucao, destino, peso);
+            if (Mathf.Abs(pesoDoZoomDaExecucao - destino) < 0.001f)
+                pesoDoZoomDaExecucao = destino;
+            if (!zoomDeExecucaoSolicitado && pesoDoZoomDaExecucao <= 0f)
+                alvoDaExecucao = null;
         }
     }
 }

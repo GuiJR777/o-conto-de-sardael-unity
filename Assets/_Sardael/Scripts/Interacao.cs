@@ -39,6 +39,7 @@ namespace Sardael
         Interagivel falandoCom;
         int falaAtual = -1;
         MovimentoDoHeroi mov;
+        SistemaDeExecucao execucao;
         Animator anim;
         Camera olho;
 
@@ -47,6 +48,7 @@ namespace Sardael
         void Awake()
         {
             mov = GetComponent<MovimentoDoHeroi>();
+            execucao = GetComponent<SistemaDeExecucao>();
             anim = GetComponent<Animator>();
         }
 
@@ -122,14 +124,15 @@ namespace Sardael
 
         bool Apertou()
         {
+            if (execucao != null && execucao.EmExecucao) return false;
 #if ENABLE_INPUT_SYSTEM
             var t = Keyboard.current;
-            if (t != null && (t.eKey.wasPressedThisFrame || t.enterKey.wasPressedThisFrame)) return true;
+            if (t != null && t.eKey.wasPressedThisFrame) return true;
             var g = Gamepad.current;
-            if (g != null && g.buttonWest.wasPressedThisFrame) return true;
+            if (g != null && g.buttonNorth.wasPressedThisFrame) return true;
             return false;
 #elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return);
+            return Input.GetKeyDown(KeyCode.E);
 #else
             return false;
 #endif

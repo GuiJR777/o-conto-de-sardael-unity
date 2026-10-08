@@ -38,10 +38,13 @@ namespace Sardael
     /// so' recolhe esse deslocamento em <see cref="OnAnimatorMove"/> e entrega ao
     /// CharacterController, pra colidir direito.
     /// </summary>
+    [DefaultExecutionOrder(-40)]
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Animator))]
     public class MovimentoDoHeroi : MonoBehaviour
     {
+        public const float VELOCIDADE_DAS_ANIMACOES = 1.5f;
+
         // nomes dos parametros do AnimatorController, num lugar so'
         public const string P_VELOCIDADE = "velocidade";
         public const string P_NO_CHAO    = "noChao";
@@ -100,6 +103,7 @@ namespace Sardael
         [SerializeField, Min(0.1f)] float aceleracaoDeCombate = 18f;
         [SerializeField, Min(0.1f)] float velocidadeDeRetornoALinha = 6f;
         [SerializeField, Min(0.001f)] float toleranciaDaLinha = 0.025f;
+        [SerializeField, Min(1f)] float multiplicadorDistanciaDaEsquiva = 1.35f;
 
         [Header("Depuracao")]
         public bool mostrarPainel = true;
@@ -143,6 +147,7 @@ namespace Sardael
         public int Olhando { get { return olhando; } }
         public ModoMovimentoHeroi ModoAtual => modoAtual;
         public bool EmModoCombate => modoAtual == ModoMovimentoHeroi.Combate;
+        public bool EmEsquiva => esquivaSolicitada || EstadoDeEsquivaAtivo();
         public bool RetornoConcluido => modoAtual != ModoMovimentoHeroi.RetornoALinha ||
             Mathf.Abs(transform.position.z - zDeRetorno) <= toleranciaDaLinha;
         public Vector2 MovimentoLido { get; private set; }
@@ -184,6 +189,7 @@ namespace Sardael
 
         CharacterController cc;
         Animator anim;
+        CombateDoHeroi combate;
         float velX, velY;
         Vector3 velocidadePlanar;
         int olhando = 1;
@@ -199,13 +205,18 @@ namespace Sardael
         bool temNoChao;
         bool temEsquivaHorizontal;
         bool temEsquivaVertical;
+        bool esquivaSolicitada;
+        bool esquivaVistaNoAnimator;
+        float esquivaSolicitadaEm;
 
         void Awake()
         {
             cc = GetComponent<CharacterController>();
             anim = GetComponent<Animator>();
+            combate = GetComponent<CombateDoHeroi>();
             if (entrada == null) entrada = GetComponent<EntradaDeCombate>();
             anim.applyRootMotion = true;
+            anim.speed = VELOCIDADE_DAS_ANIMACOES;
 
             // LER O VETOR, NAO RECALCULAR O ANGULO.
             // cos(90 graus) em ponto flutuante da' -4,4e-8. Lendo o angulo, um corpo nascido
@@ -244,28 +255,27 @@ namespace Sardael
 
             bool ocupado = EmAcao;
             AtualizarConhecimentoDosParametros();
+            AtualizarEstadoDaEsquiva();
 
             // ---- habilidades: so' pedem, quem executa e' o Animator ----
-            if (!ocupado && NoChao)
+            bool cancelouAtaqueParaEsquivar = false;
+            if (esquivou && NoChao && ocupado && combate != null)
             {
-                if (esquivou)
-                {
-                    Vector2 direcaoDaEsquiva = EmModoCombate
-                        ? CalcularDirecaoDaEsquiva(eixo)
-                        : Vector2.down;
-                    if (temEsquivaHorizontal)
-                        anim.SetFloat(P_ESQUIVA_HORIZONTAL, direcaoDaEsquiva.x);
-                    if (temEsquivaVertical)
-                        anim.SetFloat(P_ESQUIVA_VERTICAL, direcaoDaEsquiva.y);
-                    anim.SetTrigger(P_ESQUIVAR);
-                    velX = 0f;
-                    velocidadePlanar = Vector3.zero;
-                    // O estado so' entra na avaliacao do Animator no fim do quadro. Sem isto,
-                    // a locomocao abaixo ainda usa o analogico da esquiva e gira o corpo,
-                    // fazendo um dodge lateral virar outro recuo em relacao ao novo facing.
-                    ocupado = true;
-                }
-                else if (rolou) { anim.SetTrigger(P_ROLAR); velX = 0f; }
+                cancelouAtaqueParaEsquivar = combate.CancelarParaAcaoPrioritaria();
+                if (cancelouAtaqueParaEsquivar) ocupado = false;
+            }
+
+            if (NoChao && esquivou && !ocupado)
+            {
+                IniciarEsquiva(eixo, cancelouAtaqueParaEsquivar);
+                // O estado so' entra na avaliacao do Animator no fim do quadro. Sem isto,
+                // a locomocao abaixo ainda usa o analogico da esquiva e gira o corpo,
+                // fazendo um dodge lateral virar outro recuo em relacao ao novo facing.
+                ocupado = true;
+            }
+            else if (!ocupado && NoChao)
+            {
+                if (rolou) { anim.SetTrigger(P_ROLAR); velX = 0f; }
                 else if (arrancou) { anim.SetTrigger(P_ARRANCAR); velX = 0f; }
             }
 
@@ -333,6 +343,7 @@ namespace Sardael
             {
                 Vector3 delta = anim.deltaPosition;
                 delta.y = 0f;
+                if (EstadoDeEsquivaAtivo()) delta *= multiplicadorDistanciaDaEsquiva;
                 deslocamentoDaAnimacao += delta;
             }
             else if (modoAtual == ModoMovimentoHeroi.Exploracao)
@@ -475,6 +486,49 @@ namespace Sardael
                 Vector3.Dot(intencao, frente)).normalized;
         }
 
+        void IniciarEsquiva(Vector2 eixo, bool interrompeuAtaque)
+        {
+            Vector2 direcaoDaEsquiva = EmModoCombate
+                ? CalcularDirecaoDaEsquiva(eixo)
+                : Vector2.down;
+            if (temEsquivaHorizontal)
+                anim.SetFloat(P_ESQUIVA_HORIZONTAL, direcaoDaEsquiva.x);
+            if (temEsquivaVertical)
+                anim.SetFloat(P_ESQUIVA_VERTICAL, direcaoDaEsquiva.y);
+
+            if (interrompeuAtaque) anim.CrossFade("Esquiva", 0.03f, 0, 0f);
+            else anim.SetTrigger(P_ESQUIVAR);
+
+            esquivaSolicitada = true;
+            esquivaVistaNoAnimator = false;
+            esquivaSolicitadaEm = Time.time;
+            velX = 0f;
+            velocidadePlanar = Vector3.zero;
+        }
+
+        void AtualizarEstadoDaEsquiva()
+        {
+            if (EstadoDeEsquivaAtivo())
+            {
+                esquivaVistaNoAnimator = true;
+                return;
+            }
+
+            if (esquivaSolicitada &&
+                (esquivaVistaNoAnimator || Time.time - esquivaSolicitadaEm > 0.5f))
+            {
+                esquivaSolicitada = false;
+                esquivaVistaNoAnimator = false;
+            }
+        }
+
+        bool EstadoDeEsquivaAtivo()
+        {
+            if (anim == null) return false;
+            if (anim.GetCurrentAnimatorStateInfo(0).IsName("Esquiva")) return true;
+            return anim.IsInTransition(0) && anim.GetNextAnimatorStateInfo(0).IsName("Esquiva");
+        }
+
         public void EntrarEmCombate()
         {
             modoAtual = ModoMovimentoHeroi.Combate;
@@ -532,6 +586,7 @@ namespace Sardael
                 esquivou = false; rolou = false; arrancou = false;
                 eixoDeFora = Vector2.zero; correrDeFora = false;
                 puloDeFora = esquivaDeFora = rolarDeFora = arrancoDeFora = false;
+                entrada?.DesarmarCorrida();
 
                 // PARA NA HORA, nao por desaceleracao. Zerar so' a entrada deixa a velocidade
                 // vigente escorrer pela aceleracao (16 m/s2), o que da' meio metro de deslize
@@ -554,11 +609,12 @@ namespace Sardael
             if (!SoInjecao && entrada != null)
             {
                 eixo += entrada.Movimento;
-                correndo |= entrada.Correndo;
                 pulou |= entrada.ConsumirPulo();
                 esquivou |= entrada.ConsumirEsquiva();
             }
             eixo = Vector2.ClampMagnitude(eixo, 1f);
+            if (!SoInjecao && entrada != null)
+                correndo |= entrada.AtualizarCorrida(eixo, false);
         }
 
         void OnGUI()
@@ -577,6 +633,12 @@ namespace Sardael
                 string.Format("x/z = {0:F2}/{1:F2}    velocidade = {2:F2} m/s    no chao: {3}",
                               transform.position.x, transform.position.z, VelocidadeAtual, NoChao),
                 e);
+        }
+
+        void OnDisable()
+        {
+            esquivaSolicitada = false;
+            esquivaVistaNoAnimator = false;
         }
     }
 }

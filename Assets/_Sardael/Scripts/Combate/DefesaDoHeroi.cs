@@ -12,6 +12,7 @@ namespace Sardael
         [SerializeField] Animator animator;
         [SerializeField] SistemaDeFlow flow;
         [SerializeField] DiretorDeCombate diretor;
+        [SerializeField, Min(0.1f)] float janelaDeParry = 0.6f;
         [SerializeField, Min(0.1f)] float janelaDeContraAtaque = 0.9f;
         [SerializeField, Min(0f)] float danoDoContraAtaque = 4f;
         [SerializeField, Min(0f)] float poiseDoContraAtaque = 100f;
@@ -20,9 +21,11 @@ namespace Sardael
         [SerializeField, Range(30f, 360f)] float anguloDoParry = 220f;
 
         AlvoDeCombate alvoDoContraAtaque;
+        AlvoDeCombate alvoDoBloqueio;
         float contraAtaqueAte;
         bool bloqueioAplicado;
         bool cancelado;
+        readonly JanelaDeParry estadoDoParry = new JanelaDeParry();
 
         static readonly int Bloqueando = Animator.StringToHash("bloqueando");
         static readonly int Aparar = Animator.StringToHash("aparar");
@@ -31,6 +34,8 @@ namespace Sardael
         public bool BloqueandoAgora => !cancelado && entrada != null && entrada.Bloqueando;
         public bool ContraAtaqueDisponivel => alvoDoContraAtaque != null &&
             alvoDoContraAtaque.Valido && Time.time <= contraAtaqueAte;
+        public float DuracaoDaJanelaDeParry => janelaDeParry;
+        public AlvoDeCombate AlvoDoBloqueio => alvoDoBloqueio;
         public int Aparos { get; private set; }
         public int ContraAtaques { get; private set; }
 
@@ -40,7 +45,8 @@ namespace Sardael
             MovimentoDoHeroi novoMovimento,
             Animator novoAnimator,
             SistemaDeFlow novoFlow,
-            DiretorDeCombate novoDiretor = null)
+            DiretorDeCombate novoDiretor = null,
+            float novaJanelaDeParry = 0.6f)
         {
             entrada = novaEntrada;
             combate = novoCombate;
@@ -48,6 +54,7 @@ namespace Sardael
             animator = novoAnimator;
             flow = novoFlow;
             diretor = novoDiretor;
+            janelaDeParry = Mathf.Max(0.1f, novaJanelaDeParry);
         }
 
         void Awake()
@@ -64,21 +71,36 @@ namespace Sardael
             bool querBloquear = BloqueandoAgora;
             if (querBloquear)
             {
-                var ameaca = diretor == null
+                Vector2 movimentoLido = entrada == null ? Vector2.zero : entrada.Movimento;
+                Vector3 direcaoDeEntrada = new Vector3(
+                    movimentoLido.x, 0f, movimentoLido.y);
+                alvoDoBloqueio = combate == null
                     ? null
-                    : diretor.AmeacaMaisUrgente(
-                        transform.position, transform.forward, alcanceDoParry, anguloDoParry);
-                if (ameaca != null)
+                    : combate.EscolherAlvoDirecional(direcaoDeEntrada, alvoDoBloqueio);
+
+                Vector3 direcao = direcaoDeEntrada.sqrMagnitude >= 0.04f
+                    ? direcaoDeEntrada
+                    : transform.forward;
+                if (alvoDoBloqueio != null && alvoDoBloqueio.Valido)
                 {
-                    Vector3 direcao = ameaca.transform.position - transform.position;
+                    direcao = alvoDoBloqueio.transform.position - transform.position;
                     direcao.y = 0f;
-                    if (bloqueioAplicado || combate == null || !combate.CancelarParaDefesa(direcao))
-                        movimento?.DefinirDirecaoDeCombate(direcao);
+                    movimento?.DefinirAlvoContextualDeCombate(alvoDoBloqueio.transform);
                 }
+                else alvoDoBloqueio = null;
+
+                // Bloquear cancela o ataque mesmo sem haver um alvo selecionado.
+                // Quando existe, o alvo direcional orienta o personagem como nos ataques.
+                bool cancelouAtaque = !bloqueioAplicado && combate != null &&
+                    combate.CancelarParaDefesa(direcao);
+                if (!cancelouAtaque && direcao.sqrMagnitude > 0.0001f)
+                    movimento?.DefinirDirecaoDeCombate(direcao);
             }
             if (querBloquear != bloqueioAplicado)
             {
                 bloqueioAplicado = querBloquear;
+                if (querBloquear) estadoDoParry.Abrir(Time.time, janelaDeParry);
+                else LimparAlvoEJanelaDeBloqueio();
                 movimento?.Travar(this, querBloquear);
                 if (animator != null) animator.SetBool(Bloqueando, querBloquear);
             }
@@ -104,6 +126,8 @@ namespace Sardael
 
             movimento.DefinirDirecaoDeCombate(direcao);
 
+            if (!estadoDoParry.TentarConsumir(Time.time)) return true;
+
             alvoDoContraAtaque = atacante.Alvo;
             contraAtaqueAte = Time.time + janelaDeContraAtaque;
             Aparos++;
@@ -117,6 +141,7 @@ namespace Sardael
         {
             cancelado = true;
             alvoDoContraAtaque = null;
+            LimparAlvoEJanelaDeBloqueio();
             bloqueioAplicado = false;
             movimento?.Travar(this, false);
             if (animator != null) animator.SetBool(Bloqueando, false);
@@ -126,6 +151,7 @@ namespace Sardael
         {
             cancelado = false;
             alvoDoContraAtaque = null;
+            LimparAlvoEJanelaDeBloqueio();
             bloqueioAplicado = false;
             movimento?.Travar(this, false);
             if (animator != null) animator.SetBool(Bloqueando, false);
@@ -142,7 +168,8 @@ namespace Sardael
             movimento?.DefinirDirecaoDeCombate(direcao);
             if (animator != null) animator.SetTrigger(ContraAtacar);
             alvo.ReceberContraAtaque(danoDoContraAtaque, poiseDoContraAtaque, transform);
-            StartCoroutine(TravarContraAtaque(0.55f));
+            StartCoroutine(TravarContraAtaque(
+                0.55f / MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES));
         }
 
         IEnumerator TravarContraAtaque(float tempo)
@@ -150,6 +177,13 @@ namespace Sardael
             movimento?.Travar(this, true);
             yield return new WaitForSeconds(tempo);
             if (!BloqueandoAgora) movimento?.Travar(this, false);
+        }
+
+        void LimparAlvoEJanelaDeBloqueio()
+        {
+            estadoDoParry.Fechar();
+            alvoDoBloqueio = null;
+            movimento?.DefinirAlvoContextualDeCombate(null);
         }
 
         void OnDisable() => Cancelar();

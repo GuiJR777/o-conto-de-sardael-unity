@@ -42,11 +42,13 @@ namespace Sardael
         bool habilitouEsquivar;
         bool habilitouPular;
         bool habilitouCorrer;
+        bool corridaArmada;
+        bool bloqueioInjetado;
 
         public Vector2 Movimento => mover == null ? Vector2.zero : mover.ReadValue<Vector2>();
         public float MoveX => Movimento.x;
-        public bool Bloqueando => bloquear != null && bloquear.IsPressed();
-        public bool Correndo => correr != null && correr.IsPressed();
+        public bool Bloqueando => bloqueioInjetado || (bloquear != null && bloquear.IsPressed());
+        public bool Correndo => corridaArmada;
 
         public void Configurar(InputActionAsset asset)
         {
@@ -107,7 +109,11 @@ namespace Sardael
                 pular.performed += AoPular;
                 if (!pular.enabled) { pular.Enable(); habilitouPular = true; }
             }
-            if (correr != null && !correr.enabled) { correr.Enable(); habilitouCorrer = true; }
+            if (correr != null)
+            {
+                correr.performed += AoCorrer;
+                if (!correr.enabled) { correr.Enable(); habilitouCorrer = true; }
+            }
         }
 
         void OnDisable()
@@ -118,6 +124,7 @@ namespace Sardael
             if (especial != null) especial.performed -= AoEspecial;
             if (esquivar != null) esquivar.performed -= AoEsquivar;
             if (pular != null) pular.performed -= AoPular;
+            if (correr != null) correr.performed -= AoCorrer;
             if (habilitouAtacar && atacar != null) atacar.Disable();
             if (habilitouInteragir && interagir != null) interagir.Disable();
             if (habilitouExecutar && executar != null) executar.Disable();
@@ -132,6 +139,8 @@ namespace Sardael
                 habilitouCorrer = false;
             ataquesPendentes = interacoesPendentes = execucoesPendentes = especiaisPendentes =
                 esquivasPendentes = pulosPendentes = 0;
+            corridaArmada = false;
+            bloqueioInjetado = false;
         }
 
         void AoAtacar(InputAction.CallbackContext contexto)
@@ -144,6 +153,20 @@ namespace Sardael
         void AoEspecial(InputAction.CallbackContext contexto) => especiaisPendentes = 1;
         void AoEsquivar(InputAction.CallbackContext contexto) => esquivasPendentes = 1;
         void AoPular(InputAction.CallbackContext contexto) => pulosPendentes = 1;
+        void AoCorrer(InputAction.CallbackContext contexto) => RegistrarToqueDeCorrida();
+
+        public void RegistrarToqueDeCorrida() => corridaArmada = true;
+
+        public bool AtualizarCorrida(Vector2 movimento, bool travado)
+        {
+            if (travado || movimento.sqrMagnitude <= 0.0225f)
+                corridaArmada = false;
+            return corridaArmada;
+        }
+
+        public void DesarmarCorrida() => corridaArmada = false;
+
+        public void InjetarBloqueio(bool pressionado) => bloqueioInjetado = pressionado;
 
         public bool ConsumirAtaque()
         {

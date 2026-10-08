@@ -59,14 +59,17 @@ namespace Sardael
         }
     }
 
+    [DefaultExecutionOrder(-45)]
     public sealed class SistemaDeExecucao : MonoBehaviour
     {
         [SerializeField] MovimentoDoHeroi movimento;
         [SerializeField] EntradaDeCombate entrada;
+        [SerializeField] CombateDoHeroi combate;
         [SerializeField] RegistroDeCombate registro;
         [SerializeField] SistemaDeFlow flow;
         [SerializeField] DiretorDeCombate diretor;
         [SerializeField] Animator animatorHeroi;
+        [SerializeField] CameraDeCombate cameraDeCombate;
         [SerializeField] RuntimeAnimatorController controladorDaDerrubadaDoExecutor;
         [SerializeField] RuntimeAnimatorController controladorDaDerrubadaDaVitima;
         [SerializeField] VarianteDeExecucao[] variantes = Array.Empty<VarianteDeExecucao>();
@@ -95,6 +98,16 @@ namespace Sardael
                 ? variantes[indiceDaUltimaVariante].Nome
                 : "-";
 
+        void Awake()
+        {
+            if (movimento == null) movimento = GetComponent<MovimentoDoHeroi>();
+            if (entrada == null) entrada = GetComponent<EntradaDeCombate>();
+            if (combate == null) combate = GetComponent<CombateDoHeroi>();
+            if (animatorHeroi == null) animatorHeroi = GetComponent<Animator>();
+            if (cameraDeCombate == null)
+                cameraDeCombate = FindAnyObjectByType<CameraDeCombate>();
+        }
+
         public void Configurar(
             MovimentoDoHeroi novoMovimento,
             EntradaDeCombate novaEntrada,
@@ -102,16 +115,19 @@ namespace Sardael
             SistemaDeFlow novoFlow,
             DiretorDeCombate novoDiretor,
             Animator novoAnimatorHeroi,
+            CameraDeCombate novaCameraDeCombate,
             RuntimeAnimatorController novoControladorDaDerrubadaDoExecutor,
             RuntimeAnimatorController novoControladorDaDerrubadaDaVitima,
             VarianteDeExecucao[] novasVariantes)
         {
             movimento = novoMovimento;
             entrada = novaEntrada;
+            combate = novoMovimento == null ? null : novoMovimento.GetComponent<CombateDoHeroi>();
             registro = novoRegistro;
             flow = novoFlow;
             diretor = novoDiretor;
             animatorHeroi = novoAnimatorHeroi;
+            cameraDeCombate = novaCameraDeCombate;
             controladorDaDerrubadaDoExecutor = novoControladorDaDerrubadaDoExecutor;
             controladorDaDerrubadaDaVitima = novoControladorDaDerrubadaDaVitima;
             ConfigurarVariantes(novasVariantes);
@@ -128,21 +144,26 @@ namespace Sardael
         {
             if (entrada == null || EmExecucao) return;
             if (entrada.ConsumirEspecial()) TentarEspecial();
-            if (entrada.ConsumirInteracao() && ExisteAlvoAtordoadoExecutavel())
-                interacaoPendenteAte = Time.unscaledTime + toleranciaDoComandoDeInteracao;
+            bool interagiu = entrada.ConsumirInteracao();
+            if (interagiu)
+            {
+                if (ExisteAlvoAtordoadoExecutavel())
+                    interacaoPendenteAte = Time.unscaledTime + toleranciaDoComandoDeInteracao;
+                else if (TentarExecutar())
+                    return;
+            }
 
             if (Time.unscaledTime <= interacaoPendenteAte && TentarExecutarAtordoado())
             {
                 interacaoPendenteAte = -1f;
                 return;
             }
-
-            if (entrada.ConsumirExecucao()) TentarExecutar();
         }
 
         public bool TentarExecutarAtordoado()
         {
-            if (EmExecucao || registro == null || movimento == null || movimento.EmAcao ||
+            if (EmExecucao || registro == null || movimento == null || movimento.Travado ||
+                AcaoAtualImpedeExecucao() ||
                 ContarVariantesValidas() == 0)
                 return false;
             registro.PreencherTodos(transform.position, alvos);
@@ -152,6 +173,8 @@ namespace Sardael
                 new Vector3(eixo.x, 0f, eixo.y));
 
             if (escolhido == null || !escolhido.TentarReservar(this)) return false;
+            combate?.CancelarParaAcaoPrioritaria();
+            entrada?.CancelarAtaquesPendentes();
             rotina = StartCoroutine(RotinaDeExecucao(escolhido, SortearVariante()));
             return true;
         }
@@ -192,7 +215,7 @@ namespace Sardael
         public bool TentarExecutar()
         {
             if (EmExecucao || flow == null || !flow.Cheio || registro == null || movimento == null ||
-                movimento.EmAcao || ContarVariantesValidas() == 0)
+                movimento.Travado || AcaoAtualImpedeExecucao() || ContarVariantesValidas() == 0)
                 return false;
 
             Vector2 eixo = entrada == null ? Vector2.zero : entrada.Movimento;
@@ -210,6 +233,8 @@ namespace Sardael
                 return false;
             }
 
+            combate?.CancelarParaAcaoPrioritaria();
+            entrada?.CancelarAtaquesPendentes();
             rotina = StartCoroutine(RotinaDeExecucao(alvo, SortearVariante()));
             return true;
         }
@@ -297,6 +322,7 @@ namespace Sardael
             alvo.transform.rotation = variante.Postura == PosturaDeExecucao.EmPe
                 ? rotacaoDoExecutor
                 : Quaternion.LookRotation(-direcaoFinal, Vector3.up);
+            cameraDeCombate?.IniciarZoomDeExecucao(alvo.transform);
 
             RuntimeAnimatorController originalHeroi = animatorHeroi == null ? null : animatorHeroi.runtimeAnimatorController;
             Animator animatorAlvo = alvo.GetComponent<Animator>();
@@ -308,7 +334,7 @@ namespace Sardael
             {
                 AplicarControlador(animatorHeroi, controladorDaDerrubadaDoExecutor);
                 AplicarControlador(animatorAlvo, controladorDaDerrubadaDaVitima);
-                yield return new WaitForSeconds(duracaoDaDerrubada);
+                yield return new WaitForSeconds(DuracaoAjustada(duracaoDaDerrubada));
 
                 if (alvo == null || !alvo.Valido)
                 {
@@ -328,7 +354,7 @@ namespace Sardael
             AplicarControlador(animatorHeroi, variante.ControladorDoExecutor);
             AplicarControlador(animatorAlvo, variante.ControladorDaVitima);
 
-            yield return new WaitForSeconds(variante.InstanteDoImpacto);
+            yield return new WaitForSeconds(DuracaoAjustada(variante.InstanteDoImpacto));
             if (alvo != null && alvo.Valido)
             {
                 var efeito = alvo.GetComponent<EfeitoDeFinalizacao>();
@@ -342,7 +368,7 @@ namespace Sardael
             }
 
             yield return new WaitForSeconds(
-                Mathf.Max(0f, variante.DuracaoTotal - variante.InstanteDoImpacto));
+                DuracaoAjustada(Mathf.Max(0f, variante.DuracaoTotal - variante.InstanteDoImpacto)));
             if (animatorAlvo != null) animatorAlvo.speed = 0f;
             RestaurarHeroi(originalHeroi);
             Encerrar(alvo, diretorEstavaAtivo, true);
@@ -351,7 +377,7 @@ namespace Sardael
         static void AplicarControlador(Animator animator, RuntimeAnimatorController controlador)
         {
             if (animator == null || controlador == null) return;
-            animator.speed = 1f;
+            animator.speed = MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES;
             animator.runtimeAnimatorController = controlador;
             animator.Rebind();
             animator.Update(0f);
@@ -365,6 +391,7 @@ namespace Sardael
 
         void Encerrar(AlvoDeCombate alvo, bool reativarDiretor, bool execucaoConcluida = false)
         {
+            cameraDeCombate?.EncerrarZoomDeExecucao();
             movimento?.Travar(this, false);
             movimento?.CancelarDeslocamentoDeCombate();
             alvo?.LiberarReserva(this);
@@ -379,6 +406,17 @@ namespace Sardael
             if (diretor != null)
                 diretor.DefinirAtivo(heroiPodeContinuar && (reativarDiretor || encontroContinua));
             rotina = null;
+        }
+
+        bool AcaoAtualImpedeExecucao()
+        {
+            return movimento != null && movimento.EmAcao &&
+                (combate == null || !combate.EmAtaque);
+        }
+
+        static float DuracaoAjustada(float duracao)
+        {
+            return duracao / MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES;
         }
 
         int ContarVariantesValidas()
@@ -424,6 +462,7 @@ namespace Sardael
 
         void OnDisable()
         {
+            cameraDeCombate?.EncerrarZoomDeExecucao();
             movimento?.Travar(this, false);
             interacaoPendenteAte = -1f;
             rotina = null;

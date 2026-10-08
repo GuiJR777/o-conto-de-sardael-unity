@@ -25,7 +25,8 @@ namespace Sardael
         public float Maxima => vidaMaxima;
         public float Normalizada => vidaMaxima <= 0f ? 0f : vidaAtual / vidaMaxima;
         public bool Vivo => vivo;
-        public bool Invulneravel => vivo && Time.time < invulneravelAte;
+        public bool Invulneravel => vivo &&
+            (Time.time < invulneravelAte || (movimento != null && movimento.EmEsquiva));
         public int GolpesRecebidos { get; private set; }
         public int GolpesBloqueados { get; private set; }
 
@@ -71,7 +72,8 @@ namespace Sardael
 
             if (animator != null) animator.SetTrigger(Atingido);
             if (reacao != null) StopCoroutine(reacao);
-            reacao = StartCoroutine(TravarDuranteReacao(0.5f));
+            reacao = StartCoroutine(TravarDuranteReacao(
+                0.5f / MovimentoDoHeroi.VELOCIDADE_DAS_ANIMACOES));
             return true;
         }
 

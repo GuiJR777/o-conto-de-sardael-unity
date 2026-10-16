@@ -32,8 +32,6 @@ namespace SardaelEditor
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@Stun01.fbx";
         const string ClipMorte =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/HumanM@CombatDeath01.fbx";
-        const string ClipAparo =
-            "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Combat/Polearm/HumanM@ParryPolearm01 - Hit.fbx";
         const string ClipAndarFrente =
             "Assets/_Pacotes/Kevin Iglesias/Human Animations/Animations/Male/Movement/Walk/HumanM@Walk01_Forward.fbx";
         const string ClipAndarTras =
@@ -128,46 +126,16 @@ namespace SardaelEditor
             heroi.name = "Sardael";
             heroi.transform.SetPositionAndRotation(
                 new Vector3(-9f, 0f, 0f), Quaternion.Euler(0f, 90f, 0f));
-            RemoverLegado(heroi);
-
-            var animatorHeroi = heroi.GetComponent<Animator>();
-            if (animatorHeroi == null) animatorHeroi = heroi.AddComponent<Animator>();
-            animatorHeroi.runtimeAnimatorController = controllerHeroi;
-            animatorHeroi.applyRootMotion = true;
-            animatorHeroi.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-
-            var trocador = heroi.GetComponent<TrocadorDeAnimacoes>();
-            if (trocador == null) trocador = heroi.AddComponent<TrocadorDeAnimacoes>();
-            trocador.Configurar(animatorHeroi);
-            TrocadorDeAnimacoesEditor.Sincronizar(trocador);
-            var clipeAparo = CarregarClip(ClipAparo);
-            TrocadorDeAnimacoesEditor.DefinirSubstituicao(trocador, "Aparo", clipeAparo);
-            TrocadorDeAnimacoesEditor.DefinirReversao(trocador, "Aparo", true);
-
-            var cc = heroi.GetComponent<CharacterController>();
-            if (cc == null) cc = heroi.AddComponent<CharacterController>();
-            cc.center = new Vector3(0f, 0.9f, 0f);
-            cc.height = 1.8f;
-            cc.radius = 0.3f;
-
-            var movimento = heroi.GetComponent<MovimentoDoHeroi>();
-            if (movimento == null) movimento = heroi.AddComponent<MovimentoDoHeroi>();
+            var heroiConfigurado = ConfiguracaoCompartilhadaDeCombate.ConfigurarHeroi(
+                heroi, controllerHeroi, input, registro, resolvedor, flow, diretor,
+                definicoes, true);
+            var movimento = heroiConfigurado.movimento;
             movimento.zDaLinha = 0f;
             movimento.xMinimo = -17f;
             movimento.xMaximo = 17f;
-            var entrada = heroi.GetComponent<EntradaDeCombate>();
-            if (entrada == null) entrada = heroi.AddComponent<EntradaDeCombate>();
-            entrada.Configurar(input);
-            var combate = heroi.GetComponent<CombateDoHeroi>();
-            if (combate == null) combate = heroi.AddComponent<CombateDoHeroi>();
-            combate.Configurar(movimento, entrada, registro, resolvedor, animatorHeroi, definicoes);
-            var defesa = heroi.GetComponent<DefesaDoHeroi>();
-            if (defesa == null) defesa = heroi.AddComponent<DefesaDoHeroi>();
-            defesa.Configurar(entrada, combate, movimento, animatorHeroi, flow, diretor, 0.6f);
-            var vida = heroi.GetComponent<VidaDoHeroi>();
-            if (vida == null) vida = heroi.AddComponent<VidaDoHeroi>();
-            vida.Configurar(movimento, animatorHeroi, flow, diretor, defesa);
-            MontarMovimento.EncaixarLanca(heroi);
+            var combate = heroiConfigurado.combate;
+            var vida = heroiConfigurado.vida;
+            var defesa = heroiConfigurado.defesa;
 
             var inimigos = new[]
             {
@@ -182,10 +150,8 @@ namespace SardaelEditor
             CriarCamera(heroi.transform, registro, combate, out var cameraLateral, out var cameraCombate);
             diretor.Configurar(registro, heroi.transform);
             diretor.DefinirAtivo(false);
-            var execucao = heroi.AddComponent<SistemaDeExecucao>();
-            execucao.Configurar(
-                movimento, entrada, registro, flow, diretor, animatorHeroi,
-                cameraCombate,
+            var execucao = ConfiguracaoCompartilhadaDeCombate.ConfigurarExecucao(
+                heroi, heroiConfigurado, registro, flow, diretor, cameraCombate,
                 controllerDerrubadaHeroi, controllerDerrubadaVitima,
                 variantesDeExecucao);
             modo.Configurar(movimento, registro, diretor, cameraCombate);
@@ -331,7 +297,12 @@ namespace SardaelEditor
                 (reacao ? "_React_IP.controller" : "_IP.controller"));
         }
 
-        static AnimationClip[] CarregarAnimacoesDeMorte()
+        public static RuntimeAnimatorController CarregarControladorDaDerrubada(bool vitima)
+        {
+            return CarregarControllerDeExecucao(DerrubadaEscolhida, vitima ? "_Vic" : "_Att");
+        }
+
+        public static AnimationClip[] CarregarAnimacoesDeMorte()
         {
             // As quatro mortes do pacote, pra demonstrar o sorteio. Da' pra enxugar a lista
             // no Inspector de cada inimigo.
@@ -400,45 +371,9 @@ namespace SardaelEditor
             Vector3 paraJogador = jogador.position - posicao;
             paraJogador.y = 0f;
             inimigo.transform.SetPositionAndRotation(posicao, Quaternion.LookRotation(paraJogador));
-            RemoverLegado(inimigo);
-
-            var animator = inimigo.GetComponent<Animator>();
-            if (animator == null) animator = inimigo.AddComponent<Animator>();
-            animator.runtimeAnimatorController = controller;
-            animator.applyRootMotion = false;
-            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-
-            var controlador = inimigo.GetComponent<CharacterController>();
-            if (controlador == null) controlador = inimigo.AddComponent<CharacterController>();
-            controlador.center = new Vector3(0f, 0.9f, 0f);
-            controlador.height = 1.8f;
-            controlador.radius = 0.35f;
-            controlador.skinWidth = 0.04f;
-            foreach (var colisor in inimigo.GetComponents<Collider>())
-                if (colisor != controlador) Object.DestroyImmediate(colisor);
-
-            var reacao = inimigo.AddComponent<ReacaoDeCombate>();
-            reacao.Configurar(animator);
-            var motor = inimigo.AddComponent<MotorDeCombateDoInimigo>();
-            motor.Configurar(reacao);
-            var alvo = inimigo.AddComponent<AlvoDeCombate>();
-            alvo.Configurar(registro, reacao, motor);
-            alvo.AnimacoesDeMorte = CarregarAnimacoesDeMorte();
-            alvo.SumirAposMorte = true;
-            alvo.SegundosAteSumir = 5f;
-            inimigo.AddComponent<BarraDeVidaDoInimigo>();
-            inimigo.AddComponent<IndicadorDeExecucao>().Configurar(alvo, jogador);
-            var efeito = inimigo.AddComponent<EfeitoDeFinalizacao>();
-            efeito.automaticoPorAnimacao = false;
-            efeito.repetirNoLoop = false;
-            efeito.instante = 0.62f;
-            efeito.fxSangue = fxSangue;
-            efeito.decapitar = cabecaDecepada != null;
-            efeito.prefabDaCabeca = cabecaDecepada;
-            efeito.quantidade = 12f;
-            efeito.tamanho = 3.2f;
-            efeito.alcance = 2f;
-            return alvo;
+            return ConfiguracaoCompartilhadaDeCombate.ConfigurarInimigo(
+                inimigo, controller, registro, jogador, fxSangue, cabecaDecepada,
+                CarregarAnimacoesDeMorte(), true, true);
         }
 
         static InputActionAsset GarantirAcoesEspeciais(InputActionAsset input)
@@ -674,12 +609,5 @@ namespace SardaelEditor
             objeto.AddComponent<EncontroDeCombate>().Configurar(modo, inimigos);
         }
 
-        static void RemoverLegado(GameObject raiz)
-        {
-            foreach (var duelo in raiz.GetComponentsInChildren<Duelo>(true)) Object.DestroyImmediate(duelo);
-            foreach (var teste in raiz.GetComponentsInChildren<TesteDeCombate>(true)) Object.DestroyImmediate(teste);
-            foreach (var corpo in raiz.GetComponentsInChildren<CorpoDoOrc>(true)) Object.DestroyImmediate(corpo);
-            foreach (var tocador in raiz.GetComponentsInChildren<TocadorDeClipe>(true)) Object.DestroyImmediate(tocador);
-        }
     }
 }

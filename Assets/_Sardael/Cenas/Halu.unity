@@ -158887,6 +158887,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4206472827264791589, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1208792889}
+    - targetCorrespondingSourceObject: {fileID: 4206472827264791589, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1208792890}
   m_SourcePrefab: {fileID: 100100000, guid: 0cd26885282fc0f40a552cef6d77554d, type: 3}
 --- !u!4 &1208792883 stripped
 Transform:
@@ -158978,6 +158981,29 @@ MonoBehaviour:
   cor: {r: 0.87, g: 0.81, b: 0.7, a: 1}
   porMetro: 0
   duracao: 0
+--- !u!114 &1208792890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525149223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77734df2c9e2e245973219774aa2973, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sardael.EntradaDeCombate
+  acoes: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  mapa: Player
+  acaoMover: Move
+  acaoAtacar: Attack
+  acaoInteragir: Interact
+  acaoExecutar: Execution
+  acaoEspecial: FlowSpecial
+  acaoBloquear: Block
+  acaoEsquivar: Dodge
+  acaoPular: Jump
+  acaoCorrer: Sprint
 --- !u!1 &1208870129
 GameObject:
   m_ObjectHideFlags: 0

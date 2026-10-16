@@ -62,6 +62,28 @@ namespace Sardael
             Mirar();
         }
 
+        public void ObterPoseDesejada(out Vector3 posicao, out Quaternion rotacao)
+        {
+            posicao = alvo == null ? transform.position : Onde();
+            rotacao = Quaternion.Euler(inclinacao, 0f, 0f);
+        }
+
+        public void SincronizarAgora()
+        {
+            velocidadeDaCamera = Vector3.zero;
+            velocidadeDaFrente = 0f;
+            frenteAtual = 0f;
+            distanciaAlvo = distancia;
+            if (alvo != null) transform.position = Onde();
+            Mirar();
+            AtualizarCeuAgora();
+        }
+
+        public void AtualizarCeuAgora()
+        {
+            if (ceu != null) ceu.position = transform.position;
+        }
+
         void LateUpdate()
         {
             LerRoda();
@@ -79,7 +101,7 @@ namespace Sardael
             Mirar();
 
             // o ceu acompanha, mas nao gira: girar o domo junto faria a textura escorregar
-            if (ceu != null) ceu.position = transform.position;
+            AtualizarCeuAgora();
         }
 
         Vector3 Onde()

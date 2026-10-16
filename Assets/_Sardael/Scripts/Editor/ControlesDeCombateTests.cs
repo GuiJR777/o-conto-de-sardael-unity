@@ -3,14 +3,62 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace Sardael.Tests
 {
     public sealed class ControlesDeCombateTests
     {
         const string CaminhoDasAcoes = "Assets/Settings/InputSystem_Actions.inputactions";
+        static readonly string[] CenasComSardaelJogavel =
+        {
+            "Assets/_Sardael/Cenas/Halu.unity",
+            "Assets/_Sardael/Cenas/Tutorial_Fazenda.unity",
+            "Assets/_Sardael/Cenas/Floresta_Trecho_01.unity",
+            "Assets/_Sardael/Cenas/Combate_Sandbox.unity"
+        };
+
+        [Test]
+        public void CenasJogaveisPossuemUmaEntradaConfiguradaPorHeroi()
+        {
+            InputActionAsset asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(CaminhoDasAcoes);
+            Assert.That(asset, Is.Not.Null);
+            SceneSetup[] abertas = EditorSceneManager.GetSceneManagerSetup();
+            try
+            {
+                foreach (string caminho in CenasComSardaelJogavel)
+                {
+                    Scene cena = EditorSceneManager.OpenScene(caminho, OpenSceneMode.Single);
+                    MovimentoDoHeroi[] herois = cena.GetRootGameObjects()
+                        .SelectMany(raiz => raiz.GetComponentsInChildren<MovimentoDoHeroi>(true))
+                        .ToArray();
+                    Assert.That(herois, Is.Not.Empty, caminho + " precisa ter um heroi jogavel.");
+
+                    foreach (MovimentoDoHeroi heroi in herois)
+                    {
+                        EntradaDeCombate[] entradas = heroi.GetComponents<EntradaDeCombate>();
+                        Assert.That(entradas, Has.Length.EqualTo(1),
+                            caminho + " precisa ter exatamente uma EntradaDeCombate no heroi.");
+
+                        var serializado = new SerializedObject(entradas[0]);
+                        SerializedProperty acoes = serializado.FindProperty("acoes");
+                        Assert.That(acoes, Is.Not.Null);
+                        Assert.That(acoes.objectReferenceValue, Is.EqualTo(asset),
+                            caminho + " precisa apontar para InputSystem_Actions.");
+                    }
+                }
+            }
+            finally
+            {
+                if (abertas.Any(configuracao => configuracao.isLoaded))
+                    EditorSceneManager.RestoreSceneManagerSetup(abertas);
+                else
+                    EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
+        }
 
         [Test]
         public void AcoesUsamOsControlesCombinados()

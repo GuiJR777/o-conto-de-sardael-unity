@@ -11,12 +11,9 @@ namespace Sardael
     /// 2. O comando e' liberado. Sardael avanca e o capitao vem atras. Quando eles chegam
     ///    perto do troll, o capitao passa na frente, os dois trocam palavra e duelam.
     /// 3. Passados os segundos de duelo, o capitao derruba o troll e corta o pescoco dele
-    ///    com o par de clipes do Full Mount. Depois manda Sardael cuidar do resto: a camera
-    ///    trava e Sardael fica preso na faixa que ela mostra.
-    ///
-    /// O COMBATE DE SARDAEL NAO ESTA AQUI de proposito. Este script entrega o palco montado
-    /// — camera travada, trilho fechado, orcs em pe' — e para. Quando os comandos de combate
-    /// existirem, e' so' chamar <see cref="AoLiberarOsOrcs"/>.
+    ///    com o par de clipes do Full Mount. Depois manda Sardael cuidar do resto e entrega
+    ///    os orcs ao <see cref="EncontroDeCombate"/>. O encontro cuida do Free Flow, IA,
+    ///    camera e retorno a linha; este diretor continua responsavel apenas pela narrativa.
     ///
     /// Tudo por tempo e por distancia, com numero no Inspector, igual a <see cref="CenaDaMorte"/>:
     /// cutscene presa a evento de animacao vira pesadelo de sincronia quando alguem mexe num
@@ -160,7 +157,10 @@ namespace Sardael
         [Tooltip("Meia-largura da jaula: Sardael nao sai desta faixa em torno da camera.")]
         public float meiaLarguraDaArena = 6.2f;
 
-        [Header("4 - enquanto o combate nao existe")]
+        [Header("4 - combate real")]
+        public EncontroDeCombate encontroDeCombate;
+
+        [Header("Compatibilidade serializada (placeholder obsoleto)")]
         [Tooltip("Quanto tempo a jaula fica fechada, como se ele estivesse lutando, antes do aviso.")]
         public float pausaNaArena = 2.2f;
         public string nomeDoAviso = "— ainda em construção —";
@@ -339,18 +339,24 @@ namespace Sardael
             Calar();
             Pousar(capitao, parado);
 
-            // ---------- 3d: a jaula
+            // ---------- 4: o encontro real. O encontro coordena Free Flow, registro,
+            // diretor de IA e camera; este roteiro apenas espera a conclusao verdadeira.
             Agora = Etapa.Arena;
-            TravarACamera();
             Travar(false);
             AoLiberarOsOrcs();
-
-            // ---------- 4: nao ha' combate, entao o tutorial se da' por cumprido
-            Agora = Etapa.SemCombate;
-            yield return new WaitForSeconds(pausaNaArena);
-            Dizer(nomeDoAviso, avisoSemCombate);          // a caixa de fala ja' trava o comando
-            yield return new WaitForSeconds(duracaoDoAviso);
-            Calar();
+            if (encontroDeCombate == null || !encontroDeCombate.Iniciar())
+            {
+                Debug.LogError("DiretorDoCapitao nao conseguiu iniciar o encontro da Fazenda. "
+                             + "O progresso nao sera avancado.", this);
+                yield break;
+            }
+            yield return encontroDeCombate.EsperarFim();
+            if (!encontroDeCombate.Concluido)
+            {
+                Debug.LogWarning("O encontro da Fazenda terminou sem vitoria. "
+                               + "O progresso permanece inalterado.", this);
+                yield break;
+            }
 
             Progresso.Onde = Progresso.Etapa.VoltouDoTutorial;
             AbrirAVolta();
@@ -391,12 +397,12 @@ namespace Sardael
                 SetaDoCaminho.Apontar(ateOnde > sardael.position.x ? +1 : -1);
             }
             else Debug.LogWarning("DiretorDoCapitao sem portaDeVolta: o jogador fica preso na "
-                                + "fazenda depois do aviso.", this);
+                                + "fazenda depois da vitoria.", this);
         }
 
         /// <summary>
-        /// Chamado quando o palco esta' montado e os orcs sao do jogador. O combate ainda nao
-        /// existe: ligue aqui o que for feito depois, sem mexer no resto do roteiro.
+        /// Chamado quando o palco esta' montado e os orcs sao do jogador. Mantem os mesmos
+        /// objetos da narrativa ativos; o encontro habilita neles os componentes de combate.
         /// </summary>
         public virtual void AoLiberarOsOrcs()
         {

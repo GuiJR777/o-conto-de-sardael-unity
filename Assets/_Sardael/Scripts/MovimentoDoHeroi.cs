@@ -200,6 +200,8 @@ namespace Sardael
         Transform alvoContextualDeCombate;
         ModoMovimentoHeroi modoAtual = ModoMovimentoHeroi.Exploracao;
         float zDeRetorno;
+        bool limitarArenaDeCombate;
+        Bounds limitesDaArenaDeCombate;
         RuntimeAnimatorController controladorComParametrosConhecidos;
         bool temVelocidade;
         bool temNoChao;
@@ -379,10 +381,15 @@ namespace Sardael
                 if (usarLimites) p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
                 transform.position = p;
             }
-            else if (usarLimites)
+            else if (usarLimites || (modoAtual == ModoMovimentoHeroi.Combate && limitarArenaDeCombate))
             {
                 var p = transform.position;
-                p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
+                if (usarLimites) p.x = Mathf.Clamp(p.x, xMinimo, xMaximo);
+                if (modoAtual == ModoMovimentoHeroi.Combate && limitarArenaDeCombate)
+                {
+                    p.x = Mathf.Clamp(p.x, limitesDaArenaDeCombate.min.x, limitesDaArenaDeCombate.max.x);
+                    p.z = Mathf.Clamp(p.z, limitesDaArenaDeCombate.min.z, limitesDaArenaDeCombate.max.z);
+                }
                 transform.position = p;
             }
 
@@ -538,6 +545,17 @@ namespace Sardael
                 DefinirDirecaoDeCombate(transform.forward);
         }
 
+        public void DefinirLimitesDeCombate(Bounds limites)
+        {
+            limitesDaArenaDeCombate = limites;
+            limitarArenaDeCombate = limites.size.x > 0.01f && limites.size.z > 0.01f;
+        }
+
+        public void LimparLimitesDeCombate()
+        {
+            limitarArenaDeCombate = false;
+        }
+
         public void IniciarRetornoALinha(float zOriginal)
         {
             modoAtual = ModoMovimentoHeroi.RetornoALinha;
@@ -549,6 +567,7 @@ namespace Sardael
 
         public void EntrarEmExploracao(float zOriginal)
         {
+            LimparLimitesDeCombate();
             zDaLinha = zOriginal;
             zDeRetorno = zOriginal;
             modoAtual = ModoMovimentoHeroi.Exploracao;

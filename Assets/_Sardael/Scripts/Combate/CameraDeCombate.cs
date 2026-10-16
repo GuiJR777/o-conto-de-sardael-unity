@@ -13,6 +13,7 @@ namespace Sardael
         [SerializeField] RegistroDeCombate registro;
         [SerializeField] CombateDoHeroi combate;
         [SerializeField] CameraLateral cameraLateral;
+        [SerializeField] CameraQueSegue cameraQueSegue;
         [SerializeField] Vector3 afastamento = new Vector3(-3.8f, 6.2f, -8.4f);
         [SerializeField, Min(0.1f)] float duracaoDoBlend = 0.65f;
         [SerializeField, Min(0.1f)] float resposta = 5.5f;
@@ -48,6 +49,21 @@ namespace Sardael
             registro = novoRegistro;
             combate = novoCombate;
             cameraLateral = novaCameraLateral;
+            cameraQueSegue = null;
+            cameraDoJogo = GetComponent<Camera>();
+        }
+
+        public void Configurar(
+            Transform novoJogador,
+            RegistroDeCombate novoRegistro,
+            CombateDoHeroi novoCombate,
+            CameraQueSegue novaCameraQueSegue)
+        {
+            jogador = novoJogador;
+            registro = novoRegistro;
+            combate = novoCombate;
+            cameraLateral = null;
+            cameraQueSegue = novaCameraQueSegue;
             cameraDoJogo = GetComponent<Camera>();
         }
 
@@ -69,6 +85,7 @@ namespace Sardael
             pesoDoZoomDaExecucao = 0f;
             zoomDeExecucaoSolicitado = false;
             if (cameraLateral != null) cameraLateral.enabled = false;
+            if (cameraQueSegue != null) cameraQueSegue.enabled = false;
             enabled = true;
         }
 
@@ -103,6 +120,11 @@ namespace Sardael
                 cameraLateral.enabled = true;
                 cameraLateral.SincronizarAgora();
             }
+            if (cameraQueSegue != null)
+            {
+                cameraQueSegue.enabled = true;
+                cameraQueSegue.SincronizarAgora();
+            }
             enabled = false;
         }
 
@@ -114,9 +136,9 @@ namespace Sardael
             Vector3 destino;
             Quaternion rotacao;
             float fovDestino;
-            if (estado == EstadoCamera.Saindo && cameraLateral != null)
+            if (estado == EstadoCamera.Saindo && TemCameraLateral())
             {
-                cameraLateral.ObterPoseDesejada(out destino, out rotacao);
+                ObterPoseLateral(out destino, out rotacao);
                 fovDestino = fovLateral;
             }
             else
@@ -135,6 +157,7 @@ namespace Sardael
                 transform.SetPositionAndRotation(
                     Vector3.Lerp(inicioDaPosicao, destino, t),
                     Quaternion.Slerp(inicioDaRotacao, rotacao, t));
+                cameraQueSegue?.AtualizarCeuAgora();
                 if (cameraDoJogo != null)
                     cameraDoJogo.fieldOfView = Mathf.Lerp(
                         estado == EstadoCamera.Saindo ? campoDeVisao : fovLateral, fovDestino, t);
@@ -149,6 +172,11 @@ namespace Sardael
                         cameraLateral.enabled = true;
                         cameraLateral.SincronizarAgora();
                     }
+                    if (cameraQueSegue != null)
+                    {
+                        cameraQueSegue.enabled = true;
+                        cameraQueSegue.SincronizarAgora();
+                    }
                     enabled = false;
                 }
                 return;
@@ -158,6 +186,7 @@ namespace Sardael
             transform.SetPositionAndRotation(
                 Vector3.Lerp(transform.position, destino, peso),
                 Quaternion.Slerp(transform.rotation, rotacao, peso));
+            cameraQueSegue?.AtualizarCeuAgora();
             if (cameraDoJogo != null)
                 cameraDoJogo.fieldOfView = Mathf.Lerp(cameraDoJogo.fieldOfView, fovDestino, peso);
         }
@@ -212,6 +241,24 @@ namespace Sardael
                 pesoDoZoomDaExecucao = destino;
             if (!zoomDeExecucaoSolicitado && pesoDoZoomDaExecucao <= 0f)
                 alvoDaExecucao = null;
+        }
+
+        bool TemCameraLateral() => cameraLateral != null || cameraQueSegue != null;
+
+        void ObterPoseLateral(out Vector3 posicao, out Quaternion rotacao)
+        {
+            if (cameraQueSegue != null)
+            {
+                cameraQueSegue.ObterPoseDesejada(out posicao, out rotacao);
+                return;
+            }
+            if (cameraLateral != null)
+            {
+                cameraLateral.ObterPoseDesejada(out posicao, out rotacao);
+                return;
+            }
+            posicao = transform.position;
+            rotacao = transform.rotation;
         }
     }
 }
